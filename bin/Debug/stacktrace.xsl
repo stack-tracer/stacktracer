@@ -2,57 +2,11 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:freb="http://schemas.microsoft.com/win/2006/06/iis/freb" xmlns:ev="http://schemas.microsoft.com/win/2004/08/events/event" xmlns="http://www.w3.org/1999/xhtml" xmlns:msxsl="urn:schemas-microsoft-com:xslt" xmlns:jsext="urn:schemas-microsoft-com:jsext" >
   <xsl:output method="html" media-type="text/html" omit-xml-declaration="yes" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"/>
 
-  <msxsl:script language="javascript" implements-prefix="jsext" >
-    <![CDATA[
-    
-    function datediff(s, e)
-    {
-        var startDate = convertXMLDate(s);
-        
-        var endDate = convertXMLDate(e);
-        return endDate - startDate;
-    }
-    
-    function convertXMLDate(d)
-    {
-        
-        var dateObj = new Date();
-        
-        var datepat = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}).(\d{3})Z$/;
-        
-        var match = datepat.exec(d);
-        
-        if ( match != null && match.length > 0 )
-        {
-            dateObj.setFullYear(match[1]);
-            dateObj.setMonth(match[2]);
-            dateObj.setDate(match[3]);
-            dateObj.setHours(match[4]);
-            dateObj.setMinutes(match[5]);
-            dateObj.setSeconds(match[6]);
-            dateObj.setMilliseconds(match[7]);
-        }    
-        
-        return dateObj.getTime();
-    }
-    
-    function formatDate(d)
-    {
-        
-        var date = new Date(convertXMLDate(d));
-        
-        var strDate = new String();
-        strDate = date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();
-        strDate = strDate + ", " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + ":" + date.getMilliseconds();
-        return strDate;
-    }
-        
-]]>
-  </msxsl:script>
+  
   <xsl:template match="/">
     <html>
        <head>
-    <title>Timeline</title>
+    <title>Timeline view -<xsl:value-of select="./StackTracer/processName"/> <xsl:text xml:space="preserve"> </xsl:text> @ <xsl:value-of select="substring(./StackTracer/sampleCollection/StackSample[1]/samplingTime,12,12)"/></title>
     <link href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" media="all" rel="stylesheet"/>
     <link href="https://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" media="all" rel="stylesheet"/>    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.1/modernizr.min.js"></script>
