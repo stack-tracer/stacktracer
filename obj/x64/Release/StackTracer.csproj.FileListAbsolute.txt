@@ -16,3 +16,13 @@ C:\Users\rohitra\Documents\GitHub\stacktracer\obj\x64\Release\StackTracer.Proper
 C:\Users\rohitra\Documents\GitHub\stacktracer\obj\x64\Release\StackTracer.csproj.GenerateResource.Cache
 C:\Users\rohitra\Documents\GitHub\stacktracer\obj\x64\Release\StackTracer.exe
 C:\Users\rohitra\Documents\GitHub\stacktracer\obj\x64\Release\StackTracer.pdb
+C:\Users\amtripat\Documents\GitHub\updatesStacktracer\stacktracer\bin\x64\Release\StackTracer.exe.config
+C:\Users\amtripat\Documents\GitHub\updatesStacktracer\stacktracer\obj\x64\Release\StackTracer.exe
+C:\Users\amtripat\Documents\GitHub\updatesStacktracer\stacktracer\obj\x64\Release\StackTracer.pdb
+C:\Users\amtripat\Documents\GitHub\updatesStacktracer\stacktracer\bin\x64\Release\bin\Debug\stacktrace.xsl
+C:\Users\amtripat\Documents\GitHub\updatesStacktracer\stacktracer\bin\x64\Release\StackTracer.exe
+C:\Users\amtripat\Documents\GitHub\updatesStacktracer\stacktracer\bin\x64\Release\StackTracer.pdb
+C:\Users\amtripat\Documents\GitHub\updatesStacktracer\stacktracer\bin\x64\Release\Microsoft.Diagnostics.Runtime.dll
+C:\Users\amtripat\Documents\GitHub\updatesStacktracer\stacktracer\obj\x64\Release\StackTracer.csprojResolveAssemblyReference.cache
+C:\Users\amtripat\Documents\GitHub\updatesStacktracer\stacktracer\obj\x64\Release\StackTracer.Properties.Resources.resources
+C:\Users\amtripat\Documents\GitHub\updatesStacktracer\stacktracer\obj\x64\Release\StackTracer.csproj.GenerateResource.Cache

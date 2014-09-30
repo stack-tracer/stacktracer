@@ -151,7 +151,7 @@ namespace StackTracer
                 string processName ="";
                 int Pid = -1;
                 int delay = 500;
-                int stackTraceCount = 5;
+                int stackTraceCount = 10;
                 string stacktraceLocation = null;
                 int pdelay = 0;
 
@@ -290,7 +290,7 @@ namespace StackTracer
                        stackTracer.processName = Process.GetProcessById(pid).ProcessName;
                        stackTracer.processID = pid;
 
-                       for (int i = 0; i < stackTraceCount; i++)
+                       for (int i = 1; i <= stackTraceCount; i++)
                        {
                            Console.WriteLine("Collecting sample # {0} ", i);
                            StackTracerLogger.AppendLine("Collecting sample # "+ i);
