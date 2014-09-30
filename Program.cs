@@ -135,7 +135,7 @@ namespace StackTracer
             Console.WriteLine("Example: stacktracer w3wp /d 10 /s 60 /i 500");
             Console.WriteLine("Wait for 10 seconds to take 60  stacktrace samples for w3wp process...");
             Console.WriteLine("..where you are taking one stacktrace sample in every 500 milliseconds");
-            Console.Read();
+            //Console.Read();
         }
         
        static void Main(string[] args)
