@@ -398,7 +398,7 @@ namespace StackTracer
             {
                 
                using (Stream s = File.Create(tempfilepath))
-               {
+               {                   
                   _textStreamReader.CopyTo(s);
                }
                
@@ -410,6 +410,8 @@ namespace StackTracer
                 {
                     using (Stream s = File.Create(tempfilepath))
                     {
+                        //resetting the position og stream
+                        _textStreamReader.Position = 0;
                         _textStreamReader.CopyTo(s);
                     }
                 }
