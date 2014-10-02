@@ -1,2 +1,1 @@
-Process with name doesn't exist
-Exception Occured :   at StackTracer.Program.Main(String[] args) in c:\Users\amtripat\Documents\GitHub\updatesStacktracer\stacktracer\Program.cs:line 388
+Exception Occured :   at StackTracer.Program.Main(String[] args) in c:\stacktracer\stacktracer\Program.cs:line 215

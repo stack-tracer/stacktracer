@@ -2,57 +2,11 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:freb="http://schemas.microsoft.com/win/2006/06/iis/freb" xmlns:ev="http://schemas.microsoft.com/win/2004/08/events/event" xmlns="http://www.w3.org/1999/xhtml" xmlns:msxsl="urn:schemas-microsoft-com:xslt" xmlns:jsext="urn:schemas-microsoft-com:jsext" >
   <xsl:output method="html" media-type="text/html" omit-xml-declaration="yes" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"/>
 
-  <msxsl:script language="javascript" implements-prefix="jsext" >
-    <![CDATA[
-    
-    function datediff(s, e)
-    {
-        var startDate = convertXMLDate(s);
-        
-        var endDate = convertXMLDate(e);
-        return endDate - startDate;
-    }
-    
-    function convertXMLDate(d)
-    {
-        
-        var dateObj = new Date();
-        
-        var datepat = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}).(\d{3})Z$/;
-        
-        var match = datepat.exec(d);
-        
-        if ( match != null && match.length > 0 )
-        {
-            dateObj.setFullYear(match[1]);
-            dateObj.setMonth(match[2]);
-            dateObj.setDate(match[3]);
-            dateObj.setHours(match[4]);
-            dateObj.setMinutes(match[5]);
-            dateObj.setSeconds(match[6]);
-            dateObj.setMilliseconds(match[7]);
-        }    
-        
-        return dateObj.getTime();
-    }
-    
-    function formatDate(d)
-    {
-        
-        var date = new Date(convertXMLDate(d));
-        
-        var strDate = new String();
-        strDate = date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();
-        strDate = strDate + ", " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + ":" + date.getMilliseconds();
-        return strDate;
-    }
-        
-]]>
-  </msxsl:script>
+  
   <xsl:template match="/">
     <html>
        <head>
-    <title>Timeline</title>
+    <title>Timeline view -<xsl:value-of select="./StackTracer/processName"/> <xsl:text xml:space="preserve"> </xsl:text> @ <xsl:value-of select="substring(./StackTracer/sampleCollection/StackSample[1]/samplingTime,12,12)"/></title>
     <link href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" media="all" rel="stylesheet"/>
     <link href="https://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" media="all" rel="stylesheet"/>    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.1/modernizr.min.js"></script>
@@ -514,7 +468,7 @@ body {
       top: 31px;
       text-align: right;
       margin-right: 40px;
-      font-size: 16px;
+      font-size: 30px;
       line-height: 1.3;
       font-weight: 600; }
       .timeline .timeline-row .timeline-time small {
@@ -522,7 +476,7 @@ body {
         color: white;
         text-transform: uppercase;
         opacity: 0.75;
-        font-size: 11px;
+        font-size: 20px;
         font-weight: 400; }
     .timeline .timeline-row .timeline-icon {
       position: absolute;
@@ -543,6 +497,7 @@ body {
       .timeline .timeline-row .timeline-icon > div {
         border-radius: 50%;
         line-height: 34px;
+        cursor: pointer;
         font-size: 16px; }
     .timeline .timeline-row .timeline-content {
       margin-left: 40px;
@@ -666,6 +621,11 @@ body {
 {
 list-style:none;
 }
+.stacktrace li
+{
+font-size: 13px;
+
+}
      
        ]]></xsl:text>
 </style>
@@ -721,6 +681,39 @@ list-style:none;
               </xsl:for-each>             
             </table>
           </div>
+          <div class="container">
+            <xsl:variable name="CLRthreadCount" select="count(./StackTracer/sampleCollection/StackSample/processThreadCollection/Thread/stackTrace[count(*) &gt; 0 and (StackFrame/clrMethodString) != 'NULL'])"></xsl:variable>
+            <xsl:variable name="threadCount" select="count(./StackTracer/sampleCollection/StackSample/processThreadCollection/Thread)"/>
+            <xsl:variable name="sampleCount" select="count(./StackTracer/sampleCollection/StackSample)"/>
+            <xsl:if test="$CLRthreadCount &gt; 0">
+            <div class="alert alert-info" role="alert">
+              <strong>Heads up! </strong> We have collected <strong>
+                <xsl:value-of select="$sampleCount"/>
+              </strong> samples and iterated <strong><xsl:value-of select="$threadCount"></xsl:value-of></strong> threads,out of this only <strong>
+                <xsl:value-of select="$CLRthreadCount"/>
+              </strong> threads are CLR threads  .
+              The timeline view below shows only stacks of CLR threads avaialable,no native stack information is shown.   
+              
+              <ul>
+                <li>
+                  <strong>click</strong> on the filter <i class="fa fa-filter"></i> icon on the time node to show only thread stacks of same thread(matching OSID) from each sample.
+                </li>
+                <li>Click again on any threads filter icon to get back all the threads</li>
+                <li>sometimes a stackframe in a stack may show 'NULL' value,this is because this frame is a native CLR function</li>
+              </ul>   
+
+            </div>
+              </xsl:if>
+            <xsl:if test="$CLRthreadCount = 0">
+
+              <div class="alert alert-warning" role="warning">                
+              Iterated <strong><xsl:value-of select="$threadCount"></xsl:value-of></strong> threads(in  <xsl:value-of select="$sampleCount"/> samples) but threre are no CLR threads running in the process !
+              </div>
+            
+            </xsl:if>
+          
+          </div>
+         
           <div class="timeline animated">
       <xsl:call-template name="StackTraceDetailsAnim"/>
           </div>
@@ -782,32 +775,37 @@ function nodeClick()
     
         <xsl:for-each select="./processThreadCollection/Thread">
           <xsl:if test="count(./stackTrace/StackFrame) &gt; 0">
-            
+            <xsl:if test="count(./stackTrace/StackFrame) != 1 or string(./stackTrace/StackFrame[1]/clrMethodString) != 'NULL'">                  
             <div class="timeline-row">
               <xsl:attribute name="data-osid"><xsl:value-of select="./oSID"/></xsl:attribute>
         <div class="timeline-time">
-          <small>Thread <xsl:value-of select="./oSID"/> </small><xsl:value-of select="substring(./sampleCaptureTime,12,12)"/>
+          <small>OS Thread # <xsl:value-of select="./oSID"/>  </small><xsl:value-of select="substring(./sampleCaptureTime,12,12)"/>
         </div>
-        <div class="timeline-icon" data-hidden="0" >
+        <div class="timeline-icon" data-hidden="0" title="click here to show only this thread from all the samples" >
           <xsl:attribute name="data-osid"><xsl:value-of select="./oSID"/></xsl:attribute>
           <div class="bg-primary">            
             <i class="fa fa-filter"></i>
           </div>
-        </div>
+        </div>              
         <div class="panel timeline-content">
           <div class="panel-body">
-            <h2>
+            <ol class="breadcrumb">
               <xsl:attribute name="id">Stack<xsl:value-of select="../../sampleCounter"/>
               <xsl:value-of select="./oSID"/>
           </xsl:attribute>
-          <xsl:text xml:space="preserve">Thread stack of #  </xsl:text>
-            <b><xsl:value-of select="./oSID"/></b>
-          <xsl:text xml:space="preserve"> of sample </xsl:text>
-            <b>
+              <xsl:text xml:space="preserve">Stack of thread </xsl:text>
+            
+            <span class="badge"><xsl:value-of select="./managedThreadId"/></span>
+          <xsl:text xml:space="preserve"> (OS#</xsl:text>
+            <xsl:value-of select="./oSID"/>
+              <xsl:text xml:space="preserve"> ) </xsl:text>
+          <xsl:text xml:space="preserve">from Sample </xsl:text>
+            <span class="badge">
               <xsl:value-of select="../../sampleCounter"/>
-            </b>
-          Time Stamp: <xsl:value-of select="substring(./sampleCaptureTime,12,12)"/>
-            </h2>
+            </span>
+          <!--Time Stamp: <span class="badge"><xsl:value-of select="substring(./sampleCaptureTime,12,12)"/></span>-->
+            </ol>
+            <div class="well">
             <ul class="stacktrace">
               <xsl:attribute name="data-osid">trace<xsl:value-of select="./oSID"/></xsl:attribute>
             <xsl:for-each select="./stackTrace/StackFrame">
@@ -816,9 +814,12 @@ function nodeClick()
             </li>
              </xsl:for-each>
           </ul>
+            </div>
           </div>
         </div>
       </div>
+          </xsl:if> 
+          
             </xsl:if>
           </xsl:for-each>
       

@@ -682,21 +682,36 @@ font-size: 13px;
             </table>
           </div>
           <div class="container">
+            <xsl:variable name="CLRthreadCount" select="count(./StackTracer/sampleCollection/StackSample/processThreadCollection/Thread/stackTrace[count(*) &gt; 0 and (StackFrame/clrMethodString) != 'NULL'])"></xsl:variable>
+            <xsl:variable name="threadCount" select="count(./StackTracer/sampleCollection/StackSample/processThreadCollection/Thread)"/>
+            <xsl:variable name="sampleCount" select="count(./StackTracer/sampleCollection/StackSample)"/>
+            <xsl:if test="$CLRthreadCount &gt; 0">
             <div class="alert alert-info" role="alert">
               <strong>Heads up! </strong> We have collected <strong>
-                <xsl:value-of select="count(./StackTracer/sampleCollection/StackSample)"/>
-              </strong> samples and a total of <strong>
-                <xsl:value-of select="count(./StackTracer/sampleCollection/StackSample/processThreadCollection/Thread)"/>
-              </strong> thread stacks .
-              The timeline view below shows only stacks of CLR threads available,no native stack information is shown.    
+                <xsl:value-of select="$sampleCount"/>
+              </strong> samples and iterated <strong><xsl:value-of select="$threadCount"></xsl:value-of></strong> threads,out of this only <strong>
+                <xsl:value-of select="$CLRthreadCount"/>
+              </strong> threads are CLR threads  .
+              The timeline view below shows only stacks of CLR threads avaialable,no native stack information is shown.   
+              
               <ul>
                 <li>
                   <strong>click</strong> on the filter <i class="fa fa-filter"></i> icon on the time node to show only thread stacks of same thread(matching OSID) from each sample.
                 </li>
                 <li>Click again on any threads filter icon to get back all the threads</li>
+                <li>sometimes a stackframe in a stack may show 'NULL' value,this is because this frame is a native CLR function</li>
               </ul>   
 
             </div>
+              </xsl:if>
+            <xsl:if test="$CLRthreadCount = 0">
+
+              <div class="alert alert-warning" role="warning">                
+              Iterated <strong><xsl:value-of select="$threadCount"></xsl:value-of></strong> threads(in  <xsl:value-of select="$sampleCount"/> samples) but threre are no CLR threads running in the process !
+              </div>
+            
+            </xsl:if>
+          
           </div>
          
           <div class="timeline animated">

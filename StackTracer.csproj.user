@@ -20,7 +20,7 @@
     <StartArguments>3 /s 60 /i 500 /d 10</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <StartArguments>w3wp  /s 10  /d  500</StartArguments>
+    <StartArguments>w3wp /d 10 /s 60 /i 500</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <StartArguments>w3wp /d 10  /s 10  /i 800</StartArguments>

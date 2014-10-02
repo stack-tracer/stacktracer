@@ -18,3 +18,13 @@ C:\Users\rohitra\Documents\GitHub\stacktracer\obj\x86\Release\StackTracer.Proper
 C:\Users\rohitra\Documents\GitHub\stacktracer\obj\x86\Release\StackTracer.csproj.GenerateResource.Cache
 C:\Users\rohitra\Documents\GitHub\stacktracer\obj\x86\Release\StackTracer.exe
 C:\Users\rohitra\Documents\GitHub\stacktracer\obj\x86\Release\StackTracer.pdb
+C:\stacktracer\stacktracer\bin\x86\Release\StackTracer.exe.config
+C:\stacktracer\stacktracer\obj\x86\Release\StackTracer.exe
+C:\stacktracer\stacktracer\obj\x86\Release\StackTracer.pdb
+C:\stacktracer\stacktracer\bin\x86\Release\bin\Debug\stacktrace.xsl
+C:\stacktracer\stacktracer\bin\x86\Release\StackTracer.exe
+C:\stacktracer\stacktracer\bin\x86\Release\StackTracer.pdb
+C:\stacktracer\stacktracer\bin\x86\Release\Microsoft.Diagnostics.Runtime.dll
+C:\stacktracer\stacktracer\obj\x86\Release\StackTracer.csprojResolveAssemblyReference.cache
+C:\stacktracer\stacktracer\obj\x86\Release\StackTracer.Properties.Resources.resources
+C:\stacktracer\stacktracer\obj\x86\Release\StackTracer.csproj.GenerateResource.Cache
