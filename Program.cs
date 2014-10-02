@@ -74,7 +74,7 @@ namespace StackTracer
                                 }
                                 else
                                 {
-                                    Usage();
+                                    ShowHelp();
                                     state = ParseState.Help;
                                     return;
                                 }
@@ -82,7 +82,8 @@ namespace StackTracer
                             case ParseState.Samples:
                                 if (!int.TryParse(arg, out stackTraceCount))
                                 {
-                                    Usage();
+                                    Console.WriteLine("Unable to parse sample count");
+                                    ShowHelp();
                                     state = ParseState.Help;
                                     return;
                                 }
@@ -91,7 +92,8 @@ namespace StackTracer
                             case ParseState.Interval:
                                 if (!int.TryParse(arg, out delay))
                                 {
-                                    Usage();
+                                    Console.WriteLine("Unable to parse interval value");
+                                    ShowHelp();
                                     state = ParseState.Help;
                                     return;
                                 }
@@ -100,7 +102,8 @@ namespace StackTracer
                             case ParseState.Predelay:
                                 if (!int.TryParse(arg, out pdelay))
                                 {
-                                    Usage();
+                                    Console.WriteLine("Unable to parse pre-delay");
+                                    ShowHelp();
                                     state = ParseState.Help;
                                     return;
                                 }
@@ -121,7 +124,7 @@ namespace StackTracer
                             if (args[0].ToLower() == "/?")
                             {
                                 state = ParseState.Help;
-                                Usage();
+                                ShowHelp();
                             }
                             else
                             {
@@ -137,7 +140,7 @@ namespace StackTracer
                 }
                 else
                 {
-                    Usage();
+                    ShowHelp();
                     state = ParseState.Help;
 
 
@@ -147,55 +150,70 @@ namespace StackTracer
                 Process targetProcess = null;
                if (state != ParseState.Help)
                {
-                  if (string.IsNullOrEmpty(processName))
-                       pid = Pid;
-                   try
+                   if (string.IsNullOrEmpty(processName))
                    {
-                       //check for multiple process with same names
-                       Process[] processes = Process.GetProcessesByName(processName);
-                       if (processes.Length>1)
+                       pid = Pid;
+                       try
                        {
-                           string msg = string.Format("There are multiple processes with name {0} currently running,please pass PID", processName);
-                           Console.WriteLine(msg);
-                           
+                           targetProcess = Process.GetProcessById(pid);
+
                        }
-                       else if (processes.Length == 1)
+                       catch(Exception ex)
                        {
-                           targetProcess = processes[0];
-                           //get the process with process names
-                           pid = targetProcess.Id;
+                           Console.WriteLine("Could not find process with PID {0} ", pid);
+                           StackTracerLogger.AppendLine(ex.Message);
                        }
                    }
-                   catch (Exception ex)
+                   else
                    {
-                       if (processName != "")
-                           Console.WriteLine("Process with name {0} Doesn't Exist", processName);
-                       else
+                       try
                        {
-                           try
+                           //check for multiple process with same names
+                           Process[] processes = Process.GetProcessesByName(processName);
+                           if (processes.Length==0)
                            {
-                              targetProcess=Process.GetProcessById(pid);
+                               Console.WriteLine("Could not find process with name {0}", processName);
+                               Console.WriteLine("Please verify the process is currently running or passed process name without extension");
+                               
 
                            }
-                           catch
+                           if (processes.Length > 1)
                            {
-                               Console.WriteLine("Process with PID {0} Doesn't Exist", pid);
+                               string msg = string.Format("There are multiple processes with name {0} currently running,please pass PID", processName);
+                               Console.WriteLine(msg);
+
+                           }                              
+                           else if (processes.Length == 1)
+                           {
+                               targetProcess = processes[0];
+                               //get the process with process names
+                               pid = targetProcess.Id;
                            }
                        }
-                       StackTracerLogger.AppendLine("Process with name"+ processName + " doesn't exist");
-                       throw ex;
-                      
+                       catch (Exception ex)
+                       {
+                           if (processName != "")
+                               Console.WriteLine("Process with name {0} Doesn't Exist", processName);
+                           else
+                           {
+
+                           }
+                           StackTracerLogger.AppendLine("Process with name" + processName + " doesn't exist");
+                           throw ex;
+
+                       }
                    }
                    if (targetProcess!=null)
                    {
-                       if (!IsWow64(Process.GetCurrentProcess()))
+                       Exception exBitnessCheck = null;
+                       if (Environment.Is64BitOperatingSystem && Environment.Is64BitProcess)
                        {
                            currentProcessBitness=Bitness.x64;
                        }
                        else
                            currentProcessBitness=Bitness.x86;
 
-                       if (!IsWow64(targetProcess))
+                       if (Environment.Is64BitOperatingSystem && !IsWow64(targetProcess, out exBitnessCheck))
                        {
                            targetProcessBitness = Bitness.x64;
                        }
@@ -204,13 +222,18 @@ namespace StackTracer
                            targetProcessBitness = Bitness.x86;
                        }
 
-                       if (currentProcessBitness!=targetProcessBitness)
+                       if (exBitnessCheck == null && currentProcessBitness != targetProcessBitness)
                        {
 
                            string errorMessage = string.Format("Process bitness mismatch!, Stacktracer.exe is of {0} and Target process {2} is of {1}. Please use {3} StackTracer.exe", currentProcessBitness == Bitness.x64 ? "64 bit" : "32 bit",
                                targetProcessBitness == Bitness.x64 ? "64 bit" : "32 bit", targetProcess.ProcessName, currentProcessBitness == Bitness.x64 ? "32 bit" : "64 bit");
                            Console.WriteLine(errorMessage);
                            throw new Exception(errorMessage);
+                       }
+                       if (exBitnessCheck!=null)                      
+                       {
+                           StackTracerLogger.AppendLine("Bitness check for target process failed");
+                           StackTracerLogger.Append(exBitnessCheck.Message);
                        }
                        if (pdelay>0)
                        {
@@ -300,6 +323,8 @@ namespace StackTracer
                        //Console.WriteLine("There are multiple process instances with selected process name  :  {0}",processName);
                        //Console.WriteLine("Use process ID for {0} process to capture the stack trace ", processName);
                        Console.WriteLine("Example: StackTracer.exe PID /d 5 /s 60 /i 500");
+                       Console.WriteLine("StackTracer.exe w3wp /d 5 /s 60 /i 500");
+                       
                    }
                }
             }
@@ -326,24 +351,26 @@ namespace StackTracer
        /// <summary>
        /// Usage method is used to display the help menu to end user
        /// </summary>
-       static void Usage()
+       static void ShowHelp()
        {
            Console.WriteLine();
            Console.WriteLine("Usage: StackTracer : ProcessName|PID [options] ");
            Console.WriteLine("--------------------------------------------------------------------------------");
            Console.WriteLine(" ProcessName|PID  : You can give .NET process name or Process ID (Default:W3Wp)");
-           Console.WriteLine(" /D : Initial delay in seconds to halt trace collection (Default:0)");
-           Console.WriteLine(" /S : Indicates number of StackTraces for the process. (Default:10)");
+           Console.WriteLine(" /D : Delay in seconds to before starting capture.This will give you time to reproduce the issue (Default:0)");
+           Console.WriteLine(" /S : Samples to be captured- Indicates number of samples to be captured. (Default:10)");
            Console.WriteLine(" /I : Interval between StackTrace samples in milliseconds (Default:1000)");
-           Console.WriteLine(" /? : To get the usage menu");
+           Console.WriteLine(" /? : To get this help menu");
            Console.WriteLine("-------------------------------------------------------------------------------");
            Console.WriteLine("Example: stacktracer w3wp /d 10 /s 60 /i 500");
-           Console.WriteLine("Wait for 10 seconds to take 60  stacktrace samples for w3wp process...");
-           Console.WriteLine("..where you are taking one stacktrace sample in every 500 milliseconds");
+           Console.Write("Wait for 10 seconds to take 60 samples for w3wp process ");
+           Console.WriteLine("where each sample is captured every 500 milliseconds interval");
+           
            //Console.Read();
        }
-       private static bool IsWow64(Process process)
+       private static bool IsWow64(Process process,out Exception exception)
        {
+           exception=null;
            if ((Environment.OSVersion.Version.Major > 5)
                || ((Environment.OSVersion.Version.Major == 5) && (Environment.OSVersion.Version.Minor >= 1)))
            {
@@ -353,8 +380,9 @@ namespace StackTracer
 
                    return NativeMethods.IsWow64Process(process.Handle, out retVal) && retVal;
                }
-               catch
+               catch(Exception  ex)
                {
+                   exception = ex;
                    return false; // access is denied to the process
                }
            }
