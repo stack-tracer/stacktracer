@@ -117,6 +117,12 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Utils\Algorithms.cs" />
+    <Compile Include="Utils\StackTracer.cs" />
+    <Compile Include="Utils\StackSample.cs" />
+    <Compile Include="Utils\NativeMetods.cs" />
+    <Compile Include="Utils\StackFrame.cs" />
+    <Compile Include="Utils\Thread.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

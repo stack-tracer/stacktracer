@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Security;
 using System.Runtime.InteropServices;
+using StackTracer.Utils;
 
 namespace StackTracer
 { 
@@ -51,10 +52,12 @@ namespace StackTracer
                 
                // Getting the parameters inatilized 
                 #region Region for setting the console parameters switches   
-
+                
                //if no arguments are paased ,show help menu
                 if (args.ToList<string>().Count != 0)
                 {
+                    StackTracerLogger.AppendLine("Launching StackTracer.exe with params");
+                    StackTracerLogger.AppendLine(string.Join("", args));
                     foreach (var arg in args.Skip(1))
                     {
                         switch (state)
@@ -83,6 +86,7 @@ namespace StackTracer
                                 if (!int.TryParse(arg, out stackTraceCount))
                                 {
                                     Console.WriteLine("Unable to parse sample count");
+                                    StackTracerLogger.AppendLine("Unable to parse sample count");
                                     ShowHelp();
                                     state = ParseState.Help;
                                     return;
@@ -93,6 +97,7 @@ namespace StackTracer
                                 if (!int.TryParse(arg, out delay))
                                 {
                                     Console.WriteLine("Unable to parse interval value");
+                                    StackTracerLogger.AppendLine("Unable to parse interval value");
                                     ShowHelp();
                                     state = ParseState.Help;
                                     return;
@@ -103,6 +108,7 @@ namespace StackTracer
                                 if (!int.TryParse(arg, out pdelay))
                                 {
                                     Console.WriteLine("Unable to parse pre-delay");
+                                    StackTracerLogger.AppendLine("Unable to parse pre-delay");
                                     ShowHelp();
                                     state = ParseState.Help;
                                     return;
@@ -244,7 +250,7 @@ namespace StackTracer
                        System.Threading.Thread.Sleep(pdelay * 1000);
  
                        //StackTracerLogger.AppendLine("The selected pid for the process " + processName + " is " + pid);
-                       StackTracer stackTracer = new StackTracer();
+                       StackTracer.Utils.StackTracer stackTracer = new StackTracer.Utils.StackTracer();
                        List<StackSample> stackSampleCollection = new List<StackSample>();
                        stackTracer.processName = Process.GetProcessById(pid).ProcessName;
                        stackTracer.processID = pid;
@@ -268,8 +274,35 @@ namespace StackTracer
                                ClrRuntime runtime = null;
                                try { 
                                 
-                                dacLocation = dataTarget.ClrVersions[0].TryGetDacLocation();                                   
+                                dacLocation = dataTarget.ClrVersions[0].TryGetDacLocation();
+                                //to get this working in azure websites enviroment
+                                //try the path directly
+                                string mscordacwksFilename = dataTarget.ClrVersions[0].DacInfo.FileName;
+                                   
+                                if (mscordacwksFilename.Contains("mscordacwks_x86_X86_4.0."))
+                                {
+                                    if (targetProcessBitness == Bitness.x86)
+                                    {
+                                        dacLocation = @"D:\Windows\Microsoft.NET\Framework\v4.0.30319\mscordacwks.dll";
+                                    }
+                                    else
+                                        dacLocation = @"D:\Windows\Microsoft.NET\Framework64\v4.0.30319\mscordacwks.dll";
+                                }
+                                else
+                                {
+                                    if (targetProcessBitness == Bitness.x86)
+                                    {
+                                        dacLocation = @"D:\Windows\Microsoft.NET\Framework\v2.0.50727\mscordacwks.dll";
+                                    }
+                                    else
+                                        dacLocation = @"D:\Windows\Microsoft.NET\Framework64\v2.0.50727\mscordacwks.dll";
+                                    
+                                }
+
+                                StackTracerLogger.AppendLine("CLR Version: " + dataTarget.ClrVersions[0].DacInfo.FileName + dataTarget.ClrVersions[0].DacInfo.ImageBase);
+                                StackTracerLogger.AppendLine("DacLocation: " + dacLocation);
                                 runtime = dataTarget.CreateRuntime(dacLocation);
+                                   
                                    
                                }
                                catch(Exception ex)
@@ -289,7 +322,7 @@ namespace StackTracer
                                foreach (ClrThread crlThreadObj in runtime.Threads)
                                {
                                    Thread stackTracerThreadObj = new Thread();
-                                   List<StackFrame> tracerStackThread = new List<StackFrame>();
+                                   List<StackTracer.Utils.StackFrame> tracerStackThread = new List<StackTracer.Utils.StackFrame>();
                                    IList<ClrStackFrame> Stackframe = crlThreadObj.StackTrace;
                                    stackTracerThreadObj.oSID = crlThreadObj.OSThreadId;
                                    stackTracerThreadObj.managedThreadId = crlThreadObj.ManagedThreadId;
@@ -300,7 +333,7 @@ namespace StackTracer
                                        string tempClrMethod = "NULL";
                                        if (stackFrame.Method != null)
                                            tempClrMethod = stackFrame.Method.GetFullSignature(); // TO DO : We need to create a dicitonary.
-                                       tracerStackThread.Add(new StackFrame(stackFrame.DisplayString, stackFrame.InstructionPointer, tempClrMethod, stackFrame.StackPointer));
+                                       tracerStackThread.Add(new StackTracer.Utils.StackFrame(stackFrame.DisplayString, stackFrame.InstructionPointer, tempClrMethod, stackFrame.StackPointer));
                                    }
                                    stackTracerThreadObj.stackTrace = tracerStackThread;
                                    stackTracerProcessobj.processThreadCollection.Add(stackTracerThreadObj);
@@ -446,106 +479,12 @@ namespace StackTracer
            return _textStreamReader;
        }              
     }
-    /// <summary>
-    /// StackTracer class is used to contain the stacktracer object which 
-    /// is seralized to xml object after collecting stack traces.
-    /// </summary>
-    public class StackTracer
-    {
-        public StackTracer()
-        {
-
-        }
-        public string processName { get; set; }
-        public int processID { get; set; }
-        public List<StackSample> sampleCollection { get; set; }
-    }
-    /// <summary>
-    /// StackSample is the datastructure to hold the data for single SatckSample
-    /// </summary>
-    public class StackSample
-    {
-        public StackSample()
-        {
-
-        }
-        public int sampleCounter { get; set; }
-        public DateTime samplingTime { get; set; }
-        public int threadCount { get; set; }
-        public List<Thread> processThreadCollection { get; set; }
-    }
-    /// <summary>
-    /// Thread object contains the information related to the current thread for which stack
-    /// trace is being generated
-    /// </summary>
-    public class Thread
-    {
-        public Thread()
-        {
-        }
-        public Thread(DateTime stackCaptureTime, List<StackFrame> stackTrace)
-        {
-            this.sampleCaptureTime = stackCaptureTime;
-            this.stackTrace = stackTrace;
-        }
-        public DateTime sampleCaptureTime { get; set; }
-        public int managedThreadId { get; set; }
-        public uint oSID { get; set; }
-        public List<StackFrame> stackTrace { get; set; }
-    }
-    /// <summary>
-    /// StackFrame is the object which is being used to hold the data for a single stack trace for a 
-    /// particular thread.
-    /// </summary>
-    public class StackFrame
-    {
-        public StackFrame()
-        {
-
-        }
-        public StackFrame(string stackTraceString, ulong instructionPointer, string clrMethodString, ulong StackPointer)
-        {
-            this.stackTraceString = stackTraceString;
-            this.instructionPointer = instructionPointer;
-            this.clrMethodString = clrMethodString;
-            this.stackPointer = StackPointer;
-        }
-        public string stackTraceString { get; set; }
-        public ulong instructionPointer { get; set; }
-        // get this from clrmethod - GetFullSignature()
-        public string clrMethodString { get; set; }
-        public ulong stackPointer { get; set; }
-    }
-    public static class Algorithms
-    {
-        public static readonly HashAlgorithm MD5 = new MD5CryptoServiceProvider();
-        //public static readonly HashAlgorithm SHA1 = new SHA1Managed();
-        //public static readonly HashAlgorithm SHA256 = new SHA256Managed();
-        //public static readonly HashAlgorithm SHA384 = new SHA384Managed();
-        //public static readonly HashAlgorithm SHA512 = new SHA512Managed();
-        //public static readonly HashAlgorithm RIPEMD160 = new RIPEMD160Managed();
-
-
-        public static string GetChecksum(string filePath, HashAlgorithm algorithm)
-        {
-            using (var stream = new BufferedStream(File.OpenRead(filePath), 100000))
-            {
-                return GetChecksum(algorithm, stream);
-            }
-        }
-
-        public static string GetChecksum(HashAlgorithm algorithm, Stream stream)
-        {
-            byte[] hash = algorithm.ComputeHash(stream);
-            return BitConverter.ToString(hash).Replace("-", String.Empty);
-        }
-    }
-    internal static class NativeMethods
-    {
-        [DllImport("kernel32.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool IsWow64Process([In] IntPtr process, [Out] out bool wow64Process);
-    }
+    
+    
+   
+    
+   
+   
 
 }
 
