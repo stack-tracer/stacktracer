@@ -20,6 +20,7 @@ namespace StackTracer
     class Program
     {
         private static bool FileHashChecked = false;
+        private static bool HasCancelkeyPressed = false;
         /// <summary>
         /// ParseState Enum is used to define the states for the parsing the console arguments
         /// </summary>
@@ -154,6 +155,8 @@ namespace StackTracer
                 #endregion
 
                 Process targetProcess = null;
+                
+                //Console.CancelKeyPress += Console_CancelKeyPress;
                if (state != ParseState.Help)
                {
                    if (string.IsNullOrEmpty(processName))
@@ -179,8 +182,8 @@ namespace StackTracer
                            if (processes.Length==0)
                            {
                                Console.WriteLine("Could not find process with name {0}", processName);
-                               Console.WriteLine("Please verify the process is currently running or passed process name without extension");
-                               
+                               Console.WriteLine("Please verify if " + processName + " process is currently running");
+                               Console.WriteLine();
 
                            }
                            if (processes.Length > 1)
@@ -248,7 +251,11 @@ namespace StackTracer
                        
                        
                        System.Threading.Thread.Sleep(pdelay * 1000);
- 
+                       if (HasCancelkeyPressed)
+                       {
+                           StackTracerLogger.AppendLine("Detected cancel key press,aborting trace capture");
+                           Console.WriteLine("Detected cancel key press,aborting trace capture");
+                       }
                        //StackTracerLogger.AppendLine("The selected pid for the process " + processName + " is " + pid);
                        StackTracer.Utils.StackTracer stackTracer = new StackTracer.Utils.StackTracer();
                        List<StackSample> stackSampleCollection = new List<StackSample>();
@@ -257,8 +264,7 @@ namespace StackTracer
 
                        for (int i = 1; i <= stackTraceCount; i++)
                        {
-                           Console.WriteLine("Collecting sample # {0} ", i);
-                           StackTracerLogger.AppendLine("Collecting sample # "+ i);
+                           
                            // Instanting all the datastrcture to hold the 
                            //stactrace sample objects for each sample
                            StackSample stackTracerProcessobj = new StackSample();
@@ -270,37 +276,47 @@ namespace StackTracer
                            // Trying to attach the debugger to the selected process
                            using (DataTarget dataTarget = DataTarget.AttachToProcess(pid, 5000, AttachFlag.Invasive))
                            {
+                               Console.WriteLine("Collecting sample # {0} ", i);
+                               StackTracerLogger.AppendLine("Collecting sample # " + i);
+
                                string dacLocation = string.Empty;
                                ClrRuntime runtime = null;
                                try { 
                                 
                                 dacLocation = dataTarget.ClrVersions[0].TryGetDacLocation();
-                                //to get this working in azure websites enviroment
-                                //try the path directly
-                                string mscordacwksFilename = dataTarget.ClrVersions[0].DacInfo.FileName;
-                                   
-                                if (mscordacwksFilename.Contains("mscordacwks_x86_X86_4.0."))
+                                if (string.IsNullOrEmpty(dacLocation))
                                 {
-                                    if (targetProcessBitness == Bitness.x86)
-                                    {
-                                        dacLocation = @"D:\Windows\Microsoft.NET\Framework\v4.0.30319\mscordacwks.dll";
-                                    }
-                                    else
-                                        dacLocation = @"D:\Windows\Microsoft.NET\Framework64\v4.0.30319\mscordacwks.dll";
-                                }
-                                else
-                                {
-                                    if (targetProcessBitness == Bitness.x86)
-                                    {
-                                        dacLocation = @"D:\Windows\Microsoft.NET\Framework\v2.0.50727\mscordacwks.dll";
-                                    }
-                                    else
-                                        dacLocation = @"D:\Windows\Microsoft.NET\Framework64\v2.0.50727\mscordacwks.dll";
-                                    
-                                }
+                                    //to get this working in azure websites enviroment
+                                    //try the path directly
+                                    string mscordacwksFilename = dataTarget.ClrVersions[0].DacInfo.FileName;
 
+                                    if (mscordacwksFilename.Contains("mscordacwks_x86_X86_4.0."))
+                                    {
+                                        if (targetProcessBitness == Bitness.x86)
+                                        {
+                                            dacLocation = @"D:\Windows\Microsoft.NET\Framework\v4.0.30319\mscordacwks.dll";
+                                        }
+                                        else
+                                            dacLocation = @"D:\Windows\Microsoft.NET\Framework64\v4.0.30319\mscordacwks.dll";
+                                    }
+                                    else
+                                    {
+                                        if (targetProcessBitness == Bitness.x86)
+                                        {
+                                            dacLocation = @"D:\Windows\Microsoft.NET\Framework\v2.0.50727\mscordacwks.dll";
+                                        }
+                                        else
+                                            dacLocation = @"D:\Windows\Microsoft.NET\Framework64\v2.0.50727\mscordacwks.dll";
+
+                                    }
+
+                                    StackTracerLogger.AppendLine("DacLocation: " + dacLocation);
+                                }
+                               
                                 StackTracerLogger.AppendLine("CLR Version: " + dataTarget.ClrVersions[0].DacInfo.FileName + dataTarget.ClrVersions[0].DacInfo.ImageBase);
-                                StackTracerLogger.AppendLine("DacLocation: " + dacLocation);
+                                
+
+
                                 runtime = dataTarget.CreateRuntime(dacLocation);
                                    
                                    
@@ -343,6 +359,12 @@ namespace StackTracer
                            stackSampleCollection.Add(stackTracerProcessobj);
                            //Delaying the next stack trace sample by {delay} seconds.
                            System.Threading.Thread.Sleep(delay);
+                           if (HasCancelkeyPressed)
+                           {
+                               StackTracerLogger.AppendLine("Detected cancel key press,aborting trace capture");
+                               Console.WriteLine("Detected cancel key press,aborting trace capture");
+                               break;
+                           }
                        }
                        //Pushing all the satckTrace samples in the global stacktracer object for serialization into xml
                        stackTracer.sampleCollection = stackSampleCollection;
@@ -355,8 +377,10 @@ namespace StackTracer
                    {
                        //Console.WriteLine("There are multiple process instances with selected process name  :  {0}",processName);
                        //Console.WriteLine("Use process ID for {0} process to capture the stack trace ", processName);
-                       Console.WriteLine("Example: StackTracer.exe PID /d 5 /s 60 /i 500");
+                       Console.WriteLine("Example: StackTracer.exe PID /s 60 /i 500");
                        Console.WriteLine("StackTracer.exe w3wp /d 5 /s 60 /i 500");
+                       Console.WriteLine("StackTracer.exe PID /d 5 /s 60 /i 500");
+                       
                        
                    }
                }
@@ -378,25 +402,38 @@ namespace StackTracer
                     System.IO.File.WriteAllText(Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location),  "Stacktracer.log"), StackTracerLogger.ToString());
                     //Console.ReadLine();
                 }
+                HasCancelkeyPressed = false;
                 
             }
         }
+
+       static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
+       {
+           HasCancelkeyPressed = true;
+           e.Cancel = true;
+       }
        /// <summary>
        /// Usage method is used to display the help menu to end user
        /// </summary>
        static void ShowHelp()
        {
            Console.WriteLine();
-           Console.WriteLine("Usage: StackTracer : ProcessName|PID [options] ");
+           Console.WriteLine("StackTracer Version 1.0");
+           Console.WriteLine();
+           Console.WriteLine("Usage: StackTracer ProcessName|PID [options] ");
            Console.WriteLine("--------------------------------------------------------------------------------");
-           Console.WriteLine(" ProcessName|PID  : You can give .NET process name or Process ID (Default:W3Wp)");
+           Console.WriteLine(" ProcessName|PID  : .NET process name or Process ID (Default:W3Wp)");
            Console.WriteLine(" /D : Delay in seconds to before starting capture.This will give you time to reproduce the issue (Default:0)");
            Console.WriteLine(" /S : Samples to be captured- Indicates number of samples to be captured. (Default:10)");
            Console.WriteLine(" /I : Interval between StackTrace samples in milliseconds (Default:1000)");
            Console.WriteLine(" /? : To get this help menu");
            Console.WriteLine("-------------------------------------------------------------------------------");
-           Console.WriteLine("Example: stacktracer w3wp /d 10 /s 60 /i 500");
+           Console.WriteLine("Examples:");
+           Console.WriteLine("stacktracer w3wp /d 10 /s 60 /i 500");
            Console.Write("Wait for 10 seconds to take 60 samples for w3wp process ");
+           Console.WriteLine("where each sample is captured every 500 milliseconds interval");
+           Console.WriteLine("stacktracer 5688  /s 60 /i 500");
+           Console.Write("Capture 60 samples for process with id 5688 ");
            Console.WriteLine("where each sample is captured every 500 milliseconds interval");
            
            //Console.Read();
@@ -444,6 +481,7 @@ namespace StackTracer
 
                 if (!FileHashChecked && Algorithms.GetChecksum(Algorithms.MD5,_textStreamReader)!=Algorithms.GetChecksum(tempfilepath,Algorithms.MD5))
                 {
+                    FileHashChecked = true;
                     using (Stream s = File.Create(tempfilepath))
                     {
                         //resetting the position og stream

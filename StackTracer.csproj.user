@@ -23,6 +23,6 @@
     <StartArguments>6272 /s 10 /i /d</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <StartArguments>5636 /d 10  /s 10  /i 800</StartArguments>
+    <StartArguments>w3wp</StartArguments>
   </PropertyGroup>
 </Project>
