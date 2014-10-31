@@ -58,7 +58,7 @@ namespace StackTracer
                 if (args.ToList<string>().Count != 0)
                 {
                     StackTracerLogger.AppendLine("Launching StackTracer.exe with params");
-                    StackTracerLogger.AppendLine(string.Join("", args));
+                    StackTracerLogger.AppendLine(string.Join(" ", args));
                     foreach (var arg in args.Skip(1))
                     {
                         switch (state)
