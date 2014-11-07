@@ -31,18 +31,8 @@ options given at start of command line to specify the interval for stack trace a
 >*	Does not work on windows 2003	
 
 ##Downloads
-<a href="https://onedrive.live.com/download?resid=ADDED4FD84D96960%21249">Go to download Page </a>
-<table>
-  <tr>
-    <th>ID</th><th>Category</th><th>Bitness</th>
-  </tr>
-  <tr>
-    <td>1</td><td>Azure Websites</td><td><a href="https://onedrive.live.com/download?resid=ADDED4FD84D96960%21249">x86 </a> | <a href="https://onedrive.live.com/download?resid=ADDED4FD84D96960%21252"> x64 </a></td>
-  </tr>
-  <tr>
-    <td>2</td><td>.NET Process</td><td><a href="https://onedrive.live.com/download?resid=ADDED4FD84D96960%21251">x86 </a> |<a href="https://onedrive.live.com/download?resid=ADDED4FD84D96960%21250"> x64 </a></td>
-  </tr>
-</table>
+<a href="https://onedrive.live.com/download?resid=ADDED4FD84D96960%21249">Go to Release Page </a> and Download Stack Tracer.
+
 ---------------------------------------------------------------------------------------------------------------
 
 <br/>
