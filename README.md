@@ -31,7 +31,7 @@ options given at start of command line to specify the interval for stack trace a
 >*	Does not work on windows 2003	
 
 ##Downloads
-<a href="https://github.com/stack-tracer/stacktracer/releases">Go to Release Page </a> and Download Stack Tracer.
+<a href="https://github.com/stack-tracer/stacktracer/releases">Download Stack Tracer.</a> 
 
 ---------------------------------------------------------------------------------------------------------------
 
