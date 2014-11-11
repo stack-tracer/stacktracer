@@ -3,11 +3,78 @@
 <img src="http://debugging.io/images/stack.ico"
  alt="stacktracer logo" title="stacktracer" align="right" />
 
-StackTracer is a  tool that captures and analyzes stack trace samples captured at fixed intervals from any .net CLR process.
+StackTracer is a command line tool that captures stack trace samples at fixed intervals from any .net CLR process.
 
-This is a console application attaches using the debugengine Interface and works with any .net process; no access to application source code is necessary,
+This is a console application attaches and works with any .net process; no access to application source code is necessary,
 no library modifications are needed, and there is no run-time instrumentation of CLR code. Configuration
-options given at start of command line to specify the interval for stack trace and number of samples.Current implementation include output generation in xml/xslt for viewing the most recent stack traces. The performance impact of the stacktracer is minimal. Future plans include GUI, automated data capturing.	
+options given at start of command line to specify the interval for stack trace and number of samples.
+
+##Installation
+
+Just copy stacktracer.exe onto your server. Typing "stacktracer" displays its usage syntax.
+
+download it from here[]
+
+###Usage
+
+**StackTracer : ProcessName|PID [options]**
+
+
+ProcessName|PID  : You can give .NET process name or Process ID (Default:W3Wp)
+
+/D : Delay in seconds to before starting capture.This will give you time to reproduce the scenario which takes time(Default:0)
+
+/S : Samples to be captured- Indicates number of samples to be captured. (Default:10)
+
+/I : Interval between StackTrace samples in milliseconds (Default:1000)
+
+/? : To get this help menu
+
+#### When giving process name,don't specify the process extension exe.The output will be generated as XML file on the same folder where stacktracer is run from.
+
+
+**stacktracer w3wp**
+
+This command captures stacktraces of all CLR .net threads running in w3wp.exe process for 10 seconds.It will generate the output as an xml file in the same folder as stacktracer.exe.
+
+**stacktracer /s 20 /i 500 iexplore**
+
+Above command captures 20 samples where each sample is 500 milli seconds apart from w3wp.exe process.
+
+
+Current implementation include output generation in xml/xslt for viewing the most recent stack traces. The performance impact of the stacktracer is minimal. Future plans include GUI, automated data capturing.	
+
+
+## Supported runtimes
+
+* Windows vista+/Windows server 2008+ with .net framework 4.0 client side profile installed
+* works with any .net process targeted for .NET Framework 3.5/4.0/4.5
+
+## Versions
+
+* On premise environments 
+*  for running in hosted environments (where you don't have permission to run as an administrator)
+
+Each version comes with specific exe for 32 bit and 64 bit. Make sure the bitness of stacktracer and target process match.
+
+## More examples
+
+
+
+
+**stacktracer wpfapp**
+
+`The above command captures 10 samples (a sample contains stack traces of all the .net threads running in the process at a particular point of time) from wpfapp.exe where each sample is 1s (1000 ms) apart`
+
+**stacktracer w3wp /s 60 /i 500**
+
+`capture 60 samples for w3wp process where each sample is captured every 500 milliseconds interval`
+
+**stacktracer w3wp /d 10 /s 60 /i 500**
+
+`Wait for 10 seconds to take 60 samples for w3wp process where each sample is captured every 500 milliseconds interval`
+
+
 
 
 ##Highlights
