@@ -25,9 +25,8 @@ options given at start of command line to specify the interval for stack trace a
 
 ###Installation
 
-Just copy stacktracer.exe onto your server. Typing "stacktracer" displays its usage syntax.
+Just download and copy [stacktracer.exe](https://github.com/stack-tracer/stacktracer/releases) onto your server. Typing "stacktracer" displays its usage syntax.
 
-download it from here[https://github.com/stack-tracer/stacktracer/releases]
 
 ####Usage
 
