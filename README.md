@@ -9,6 +9,13 @@ This is a console application attaches and works with any .net process; no acces
 no library modifications are needed, and there is no run-time instrumentation of CLR code. Configuration
 options given at start of command line to specify the interval for stack trace and number of samples.
 
+###Installation and usage
+
+Just download and copy [stacktracer.exe](https://github.com/stack-tracer/stacktracer/releases/download/v1.0/StackTracer.zip) onto your server. Typing "stacktracer" displays its usage syntax.
+
+Please check out the [wiki](https://github.com/stack-tracer/stacktracer/wiki/capturing-and-analyzing-stacktracer-trace) for more details
+
+
 ###Highlights
 
 >*	small footprint (<1MB) single exe file
@@ -23,14 +30,9 @@ options given at start of command line to specify the interval for stack trace a
 >*	Less overhead on the running process,so you can even troubleshoot slow performance issues which are less than 3-4 seconds .	
 
 
-###Installation
-
-Just download and copy [stacktracer.exe](https://github.com/stack-tracer/stacktracer/releases/download/v1.0/StackTracer.zip) onto your server. Typing "stacktracer" displays its usage syntax.
-
 
 ####Usage
 
-Please check out the [wiki](https://github.com/stack-tracer/stacktracer/wiki/capturing-and-analyzing-stacktracer-trace) for more details
 
 **StackTracer : ProcessName|PID [options]**
 
