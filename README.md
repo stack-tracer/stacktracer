@@ -11,11 +11,11 @@ options given at start of command line to specify the interval for stack trace a
 
 ###Highlights
 
->*	800 kb single exe file(no installation required) with only dependency of .net framework 4.0 client profile.
->*	Captures stack trace of any .net process Windows forms ,WPF, asp.net you name it. 
->*	Works on Microsoft azure websites
+>*	small footprint (<1MB) single exe file
+>*	Captures stack trace of any .net process Windows forms ,WPF, asp.net,windows service etc. 
+>*	support for Microsoft Azure Websites (with the help of FREB)
 >*	No need of any symbol files.
->*	You can troubleshoot applications written in .net framework 2.0 to 4.5
+>*	Support for applications running in .net framework 2.0 to 4.5
 >*	Target 32 bit and 64 bit process.
 >*	View traces in browser. (inspired from IIS FREB)
 >*	Intuitive timeline view to filter out unwanted stacks/threads.
@@ -25,7 +25,7 @@ options given at start of command line to specify the interval for stack trace a
 
 ###Installation
 
-Just download and copy [stacktracer.exe](https://github.com/stack-tracer/stacktracer/releases) onto your server. Typing "stacktracer" displays its usage syntax.
+Just download and copy [stacktracer.exe](https://github.com/stack-tracer/stacktracer/releases/download/v1.0/StackTracer.zip) onto your server. Typing "stacktracer" displays its usage syntax.
 
 
 ####Usage
