@@ -30,6 +30,8 @@ Just download and copy [stacktracer.exe](https://github.com/stack-tracer/stacktr
 
 ####Usage
 
+Please check out the [wiki](https://github.com/stack-tracer/stacktracer/wiki/capturing-and-analyzing-stacktracer-trace) for more details
+
 **StackTracer : ProcessName|PID [options]**
 
 
