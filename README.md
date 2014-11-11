@@ -9,6 +9,20 @@ This is a console application attaches and works with any .net process; no acces
 no library modifications are needed, and there is no run-time instrumentation of CLR code. Configuration
 options given at start of command line to specify the interval for stack trace and number of samples.
 
+##Highlights
+
+>*	800 kb single exe file(no installation required) with only dependency of .net framework 4.0 client profile.
+>*	Captures stack trace of any .net process Windows forms ,WPF, asp.net you name it. 
+>*	Works on Microsoft azure websites
+>*	No need of any symbol files.
+>*	You can troubleshoot applications written in .net framework 2.0 to 4.5
+>*	Target 32 bit and 64 bit process.
+>*	View traces in browser. (inspired from IIS FREB)
+>*	Intuitive timeline view to filter out unwanted stacks/threads.
+>*	Very easy to troubleshoot Hang or High CPU issues on production enviroments.
+>*	Less overhead on the running process,so you can even troubleshoot slow performance issues which are less than 3-4 seconds .	
+
+
 ##Installation
 
 Just copy stacktracer.exe onto your server. Typing "stacktracer" displays its usage syntax.
@@ -22,15 +36,15 @@ download it from here[]
 
 ProcessName|PID  : You can give .NET process name or Process ID (Default:W3Wp)
 
-/D : Delay in seconds to before starting capture.This will give you time to reproduce the scenario which takes time(Default:0)
+`/D : Delay in seconds to before starting capture.This will give you time to reproduce the scenario which takes time(Default:0)`
 
-/S : Samples to be captured- Indicates number of samples to be captured. (Default:10)
+`/S : Samples to be captured- Indicates number of samples to be captured. (Default:10)`
 
-/I : Interval between StackTrace samples in milliseconds (Default:1000)
+`/I : Interval between StackTrace samples in milliseconds (Default:1000)`
 
-/? : To get this help menu
+`/? : To get this help menu`
 
-#### When giving process name,don't specify the process extension exe.The output will be generated as XML file on the same folder where stacktracer is run from.
+`When giving process name,don't specify the process extension exe.The output will be generated as XML file on the same folder where stacktracer is run from.`
 
 
 **stacktracer w3wp**
@@ -77,25 +91,7 @@ Each version comes with specific exe for 32 bit and 64 bit. Make sure the bitnes
 
 
 
-##Highlights
-
->*	800 kb single exe file(no installation required) with only dependency of .net framework 4.0 client profile.
->*	Captures stack trace of any .net process Windows forms ,WPF, asp.net you name it. 
->*	Works on Microsoft azure websites
->*	No need of any symbol files.
->*	You can troubleshoot applications written in .net framework 2.0 to 4.5
->*	Target 32 bit and 64 bit process.
->*	View traces in browser. (inspired from IIS FREB)
->*	Intuitive timeline view to filter out unwanted stacks/threads.
->*	Very easy to troubleshoot Hang or High CPU issues on production enviroments.
->*	Less overhead on the running process,so you can even troubleshoot slow performance issues which are less than 3-4 seconds .	
-
-
-##Limitations
-
->*	Needs .NET framework 4.0
->*	Will not show any native stack information.
->*	Does not work on windows 2003	
+	
 
 ##Downloads
 <a href="https://github.com/stack-tracer/stacktracer/releases">Download StackTracer</a> 
