@@ -52,7 +52,7 @@ Just download and copy [stacktracer.exe](https://github.com/stack-tracer/stacktr
 
 **stacktracer /s 20 /i 500 iexplore**
 
-`Above command captures 20 samples where each sample is 500 milli seconds apart from w3wp.exe process.`
+`Above command captures 20 samples where each sample is 500 milli seconds apart from iexplore.exe process.`
 
 	
 
