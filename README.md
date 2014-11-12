@@ -73,6 +73,9 @@ Please check out the [wiki](https://github.com/stack-tracer/stacktracer/wiki/cap
 
 Each version comes with specific exe for 32 bit and 64 bit. Make sure the bitness of stacktracer and target process match.
 
+Check out the [wiki](https://github.com/stack-tracer/stacktracer/wiki) for more details 
+
+
 ### More examples
 
 
