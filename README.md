@@ -11,7 +11,15 @@ options given at start of command line to specify the interval for stack trace a
 
 ###Installation and usage
 
-Just download and copy [stacktracer.exe](https://github.com/stack-tracer/stacktracer/releases/download/v1.0/StackTracer.zip) onto your server. Typing "stacktracer" displays its usage syntax.
+Just download and copy [stacktracer.exe](https://github.com/stack-tracer/stacktracer/releases/download/v1.0/StackTracer.zip) onto your server. 
+
+>* Launch command prompt as Administrator and navigate to extracted stacktracer folder
+>* run command **stacktracer \<processname|processid\>**  
+	e.g.  	**stacktracer w3wp**      
+		**stacktracer 32612**   
+		**stacktracer /s 20 /i 500 iexplore**   
+	
+
 
 Please check out the [wiki](https://github.com/stack-tracer/stacktracer/wiki/capturing-and-analyzing-stacktracer-trace) for more details
 
