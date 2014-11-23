@@ -26,7 +26,7 @@ namespace StackTracer
         /// </summary>
         enum ParseState
         {
-            Unknown, Samples, Interval,Help,Predelay
+            Unknown, Samples, Interval,Help,Predelay,RunAsChild
         }
         enum Bitness
         {
@@ -39,6 +39,7 @@ namespace StackTracer
             StringBuilder StackTracerLogger = new StringBuilder();
             var state = ParseState.Unknown;
             Bitness currentProcessBitness, targetProcessBitness;
+            bool RunAsRemote = false;
            try
             {
                 // Global variable declaration
@@ -50,15 +51,16 @@ namespace StackTracer
                 int stackTraceCount = 10;
                 string stacktraceLocation = null;
                 int pdelay = 0;
-                
+                string arguments=string.Empty;
                // Getting the parameters inatilized 
                 #region Region for setting the console parameters switches   
                 
                //if no arguments are paased ,show help menu
-                if (args.ToList<string>().Count != 0)
+                if (args!=null && args.Length != 0)
                 {
                     StackTracerLogger.AppendLine("Launching StackTracer.exe with params");
-                    StackTracerLogger.AppendLine(string.Join(" ", args));
+                    arguments=string.Join(" ", args);
+                    StackTracerLogger.AppendLine(arguments);
                     foreach (var arg in args.Skip(1))
                     {
                         switch (state)
@@ -75,6 +77,11 @@ namespace StackTracer
                                 else if (arg.ToLower() == "/d")
                                 {
                                     state = ParseState.Predelay;
+                                }
+                                else if (arg.ToLower() == "/c")
+                                {
+                                    state = ParseState.RunAsChild;
+                                    RunAsRemote = true;
                                 }
                                 else
                                 {
@@ -116,6 +123,7 @@ namespace StackTracer
                                 }
                                 state = ParseState.Unknown;
                                 break;
+
                             default:
                                 state = ParseState.Help;
                                 break;
@@ -244,6 +252,17 @@ namespace StackTracer
                            StackTracerLogger.AppendLine("Bitness check for target process failed");
                            StackTracerLogger.Append(exBitnessCheck.Message);
                        }
+                       if (RunAsRemote)
+                       {
+                           StackTracerLogger.AppendLine("Begining to inject remote thread");
+                           string appname=Assembly.GetExecutingAssembly().Location;
+                           StackTracerLogger.AppendFormat("target procid:{0}appname:{1}arguments{2}", targetProcess.Id, appname, arguments.Replace("/c", ""));
+
+                           Injector.InjectAndRun(targetProcess.Id,appname,arguments.Replace("/c",""));
+                           return;
+                       }
+
+
                        if (pdelay>0)
                        {
                            Console.WriteLine("Initiating the stacktrace capture after given delay of {0} seconds....", pdelay);
