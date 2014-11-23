@@ -8,3 +8,13 @@ C:\stacktracer\stacktracer\obj\x86\Debug\StackTracer.csproj.GenerateResource.Cac
 C:\stacktracer\stacktracer\obj\x86\Debug\StackTracer.exe
 C:\stacktracer\stacktracer\obj\x86\Debug\StackTracer.pdb
 C:\stacktracer\stacktracer\obj\x86\Debug\StackTracer.csprojResolveAssemblyReference.cache
+D:\ST\stacktracer\bin\x86\Debug\StackTracer.exe.config
+D:\ST\stacktracer\obj\x86\Debug\StackTracer.exe
+D:\ST\stacktracer\obj\x86\Debug\StackTracer.pdb
+D:\ST\stacktracer\bin\x86\Debug\bin\Debug\stacktrace.xsl
+D:\ST\stacktracer\bin\x86\Debug\StackTracer.exe
+D:\ST\stacktracer\bin\x86\Debug\StackTracer.pdb
+D:\ST\stacktracer\bin\x86\Debug\Microsoft.Diagnostics.Runtime.dll
+D:\ST\stacktracer\obj\x86\Debug\StackTracer.csprojResolveAssemblyReference.cache
+D:\ST\stacktracer\obj\x86\Debug\StackTracer.Properties.Resources.resources
+D:\ST\stacktracer\obj\x86\Debug\StackTracer.csproj.GenerateResource.Cache

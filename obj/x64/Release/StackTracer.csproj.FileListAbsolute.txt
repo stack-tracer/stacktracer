@@ -36,3 +36,6 @@ C:\stacktracer\stacktracer\obj\x64\Release\StackTracer.Properties.Resources.reso
 C:\stacktracer\stacktracer\obj\x64\Release\StackTracer.csproj.GenerateResource.Cache
 C:\stacktracer\stacktracer\obj\x64\Release\StackTracer.exe
 C:\stacktracer\stacktracer\obj\x64\Release\StackTracer.pdb
+D:\ST\stacktracer\bin\x64\Release\StackTracer.exe.config
+D:\ST\stacktracer\obj\x64\Release\StackTracer.exe
+D:\ST\stacktracer\obj\x64\Release\StackTracer.pdb
