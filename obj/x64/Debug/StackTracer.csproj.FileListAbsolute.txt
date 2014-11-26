@@ -18,3 +18,4 @@ D:\ST\stacktracer\bin\x64\Debug\Microsoft.Diagnostics.Runtime.dll
 D:\ST\stacktracer\obj\x64\Debug\StackTracer.csprojResolveAssemblyReference.cache
 D:\ST\stacktracer\obj\x64\Debug\StackTracer.Properties.Resources.resources
 D:\ST\stacktracer\obj\x64\Debug\StackTracer.csproj.GenerateResource.Cache
+C:\stacktracer\stacktracer\obj\x64\Debug\StackTracer.csprojResolveAssemblyReference.cache

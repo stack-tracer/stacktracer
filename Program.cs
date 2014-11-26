@@ -45,7 +45,7 @@ namespace StackTracer
                 // Global variable declaration
 
                 int pid = -1;
-                string processName ="";
+                string processName ="w3wp";
                 int Pid = -1;
                 int delay = 500;
                 int stackTraceCount = 10;
@@ -61,6 +61,7 @@ namespace StackTracer
                     StackTracerLogger.AppendLine("Launching StackTracer.exe with params");
                     arguments=string.Join(" ", args);
                     StackTracerLogger.AppendLine(arguments);
+
                     foreach (var arg in args.Skip(1))
                     {
                         switch (state)
@@ -165,7 +166,7 @@ namespace StackTracer
                 Process targetProcess = null;
                 
                 //Console.CancelKeyPress += Console_CancelKeyPress;
-               if (state != ParseState.Help)
+               if (true)
                {
                    if (string.IsNullOrEmpty(processName))
                    {
@@ -185,6 +186,7 @@ namespace StackTracer
                    {
                        try
                        {
+                           Console.WriteLine("Getting processes with name {0}", processName);
                            //check for multiple process with same names
                            Process[] processes = Process.GetProcessesByName(processName);
                            if (processes.Length==0)
@@ -196,6 +198,15 @@ namespace StackTracer
                            }
                            if (processes.Length > 1)
                            {
+                               if (processName=="w3wp")
+                               {
+                                   StackTracerLogger.AppendLine("Found multiple w3wp.exes running.Starting capture of each w3w0.exe process"); 
+                                   foreach (var item in processes)
+                                   {
+                                       RunCapture(StackTracerLogger, false, item.Id, delay, stackTraceCount, stacktraceLocation, pdelay, arguments, item);
+                                   }
+                               }
+
                                string msg = string.Format("There are multiple processes with name {0} currently running,please pass PID", processName);
                                Console.WriteLine(msg);
 
@@ -220,188 +231,8 @@ namespace StackTracer
 
                        }
                    }
-                   if (targetProcess!=null)
-                   {
-                       Exception exBitnessCheck = null;
-                       if (Environment.Is64BitOperatingSystem && Environment.Is64BitProcess)
-                       {
-                           currentProcessBitness=Bitness.x64;
-                       }
-                       else
-                           currentProcessBitness=Bitness.x86;
-
-                       if (Environment.Is64BitOperatingSystem && !IsWow64(targetProcess, out exBitnessCheck))
-                       {
-                           targetProcessBitness = Bitness.x64;
-                       }
-                       else
-                       {
-                           targetProcessBitness = Bitness.x86;
-                       }
-
-                       if (exBitnessCheck == null && currentProcessBitness != targetProcessBitness)
-                       {
-
-                           string errorMessage = string.Format("Process bitness mismatch!, Stacktracer.exe is of {0} and Target process {2} is of {1}. Please use {3} StackTracer.exe", currentProcessBitness == Bitness.x64 ? "64 bit" : "32 bit",
-                               targetProcessBitness == Bitness.x64 ? "64 bit" : "32 bit", targetProcess.ProcessName, currentProcessBitness == Bitness.x64 ? "32 bit" : "64 bit");
-                           Console.WriteLine(errorMessage);
-                           throw new Exception(errorMessage);
-                       }
-                       if (exBitnessCheck!=null)                      
-                       {
-                           StackTracerLogger.AppendLine("Bitness check for target process failed");
-                           StackTracerLogger.Append(exBitnessCheck.Message);
-                       }
-                       if (RunAsRemote)
-                       {
-                           StackTracerLogger.AppendLine("Begining to inject remote thread");
-                           string appname=Assembly.GetExecutingAssembly().Location;
-                           StackTracerLogger.AppendFormat("target procid:{0}appname:{1}arguments{2}", targetProcess.Id, appname, arguments.Replace("/c", ""));
-
-                           Injector.InjectAndRun(targetProcess.Id,appname,arguments.Replace("/c",""));
-                           return;
-                       }
-
-
-                       if (pdelay>0)
-                       {
-                           Console.WriteLine("Initiating the stacktrace capture after given delay of {0} seconds....", pdelay);
-                       }
-                       
-                       
-                       System.Threading.Thread.Sleep(pdelay * 1000);
-                       if (HasCancelkeyPressed)
-                       {
-                           StackTracerLogger.AppendLine("Detected cancel key press,aborting trace capture");
-                           Console.WriteLine("Detected cancel key press,aborting trace capture");
-                       }
-                       //StackTracerLogger.AppendLine("The selected pid for the process " + processName + " is " + pid);
-                       StackTracer.Utils.StackTracer stackTracer = new StackTracer.Utils.StackTracer();
-                       List<StackSample> stackSampleCollection = new List<StackSample>();
-                       stackTracer.processName = Process.GetProcessById(pid).ProcessName;
-                       stackTracer.processID = pid;
-
-                       for (int i = 1; i <= stackTraceCount; i++)
-                       {
-                           
-                           // Instanting all the datastrcture to hold the 
-                           //stactrace sample objects for each sample
-                           StackSample stackTracerProcessobj = new StackSample();
-                           stackTracerProcessobj.processThreadCollection = new List<Thread>();
-                           stackTracerProcessobj.sampleCounter = i;
-                           stackTracerProcessobj.samplingTime = DateTime.UtcNow;
-                           
-
-                           // Trying to attach the debugger to the selected process
-                           using (DataTarget dataTarget = DataTarget.AttachToProcess(pid, 5000, AttachFlag.Invasive))
-                           {
-                               Console.WriteLine("Collecting sample # {0} ", i);
-                               StackTracerLogger.AppendLine("Collecting sample # " + i);
-
-                               string dacLocation = string.Empty;
-                               ClrRuntime runtime = null;
-                               try { 
-                                
-                                dacLocation = dataTarget.ClrVersions[0].TryGetDacLocation();
-                                if (string.IsNullOrEmpty(dacLocation))
-                                {
-                                    //to get this working in azure websites enviroment
-                                    //try the path directly
-                                    string mscordacwksFilename = dataTarget.ClrVersions[0].DacInfo.FileName;
-
-                                    if (mscordacwksFilename.Contains("mscordacwks_x86_X86_4.0."))
-                                    {
-                                        if (targetProcessBitness == Bitness.x86)
-                                        {
-                                            dacLocation = @"D:\Windows\Microsoft.NET\Framework\v4.0.30319\mscordacwks.dll";
-                                        }
-                                        else
-                                            dacLocation = @"D:\Windows\Microsoft.NET\Framework64\v4.0.30319\mscordacwks.dll";
-                                    }
-                                    else
-                                    {
-                                        if (targetProcessBitness == Bitness.x86)
-                                        {
-                                            dacLocation = @"D:\Windows\Microsoft.NET\Framework\v2.0.50727\mscordacwks.dll";
-                                        }
-                                        else
-                                            dacLocation = @"D:\Windows\Microsoft.NET\Framework64\v2.0.50727\mscordacwks.dll";
-
-                                    }
-
-                                    StackTracerLogger.AppendLine("DacLocation: " + dacLocation);
-                                }
-                               
-                                StackTracerLogger.AppendLine("CLR Version: " + dataTarget.ClrVersions[0].DacInfo.FileName + dataTarget.ClrVersions[0].DacInfo.ImageBase);
-                                
-
-
-                                runtime = dataTarget.CreateRuntime(dacLocation);
-                                   
-                                   
-                               }
-                               catch(Exception ex)
-                               {
-                                  
-                                   Console.WriteLine("CLR Runtime could not be initialized or process does not have CLR loaded");
-                                   Console.WriteLine(ex.Message);                                   
-                                   StackTracerLogger.AppendLine(ex.Message);
-                                   throw ex;
-                               }
-                               stackTracerProcessobj.threadCount = runtime.Threads.Count;
-                               StackTracerLogger.AppendLine("=============================================================================================================");
-                               StackTracerLogger.AppendLine("There are" + runtime.Threads.Count + "threads in the" + Process.GetProcessById(pid).ProcessName + " process");
-                               StackTracerLogger.AppendLine("=============================================================================================================");
-                               StackTracerLogger.AppendLine();
-
-                               foreach (ClrThread crlThreadObj in runtime.Threads)
-                               {
-                                   Thread stackTracerThreadObj = new Thread();
-                                   List<StackTracer.Utils.StackFrame> tracerStackThread = new List<StackTracer.Utils.StackFrame>();
-                                   IList<ClrStackFrame> Stackframe = crlThreadObj.StackTrace;
-                                   stackTracerThreadObj.oSID = crlThreadObj.OSThreadId;
-                                   stackTracerThreadObj.managedThreadId = crlThreadObj.ManagedThreadId;
-                                   StackTracerLogger.AppendLine("There are " + crlThreadObj.StackTrace.Count + "  items in the stack for current thread ");
-                                   foreach (ClrStackFrame stackFrame in Stackframe)
-                                   {
-                                       stackTracerThreadObj.sampleCaptureTime = DateTime.UtcNow;
-                                       string tempClrMethod = "NULL";
-                                       if (stackFrame.Method != null)
-                                           tempClrMethod = stackFrame.Method.GetFullSignature(); // TO DO : We need to create a dicitonary.
-                                       tracerStackThread.Add(new StackTracer.Utils.StackFrame(stackFrame.DisplayString, stackFrame.InstructionPointer, tempClrMethod, stackFrame.StackPointer));
-                                   }
-                                   stackTracerThreadObj.stackTrace = tracerStackThread;
-                                   stackTracerProcessobj.processThreadCollection.Add(stackTracerThreadObj);
-                               }
-                           }
-                           //Adding the stacktrace sample to the stack trace sample collecction.
-                           stackSampleCollection.Add(stackTracerProcessobj);
-                           //Delaying the next stack trace sample by {delay} seconds.
-                           System.Threading.Thread.Sleep(delay);
-                           if (HasCancelkeyPressed)
-                           {
-                               StackTracerLogger.AppendLine("Detected cancel key press,aborting trace capture");
-                               Console.WriteLine("Detected cancel key press,aborting trace capture");
-                               break;
-                           }
-                       }
-                       //Pushing all the satckTrace samples in the global stacktracer object for serialization into xml
-                       stackTracer.sampleCollection = stackSampleCollection;
-                       Type testype = stackTracer.GetType();
-                       //Calling function to serialize the stacktracer object.
-                       ObjectSeralizer(stacktraceLocation, testype, stackTracer);
-                       StackTracerLogger.AppendLine();
-                   }                  
-                   else
-                   {
-                       //Console.WriteLine("There are multiple process instances with selected process name  :  {0}",processName);
-                       //Console.WriteLine("Use process ID for {0} process to capture the stack trace ", processName);
-                       Console.WriteLine("Example: StackTracer.exe PID /s 60 /i 500");
-                       Console.WriteLine("StackTracer.exe w3wp /d 5 /s 60 /i 500");
-                       Console.WriteLine("StackTracer.exe PID /d 5 /s 60 /i 500");
-                       
-                       
-                   }
+                   //do bitness check and then capture trace for the given process.
+                   RunCapture(StackTracerLogger, RunAsRemote, pid, delay, stackTraceCount, stacktraceLocation, pdelay, arguments, targetProcess);
                }
             }
             catch (Exception ex)
@@ -425,6 +256,202 @@ namespace StackTracer
                 
             }
         }
+
+       private static void RunCapture(StringBuilder StackTracerLogger, bool RunAsRemote, int pid, int delay, int stackTraceCount, string stacktraceLocation, int pdelay, string arguments, Process targetProcess)
+       {
+           Bitness currentProcessBitness, targetProcessBitness;
+           if (targetProcess != null)
+           {
+               Exception exBitnessCheck = null;
+               if (Environment.Is64BitOperatingSystem && Environment.Is64BitProcess)
+               {
+                   currentProcessBitness = Bitness.x64;
+               }
+               else
+                   currentProcessBitness = Bitness.x86;
+
+               if (Environment.Is64BitOperatingSystem && !IsWow64(targetProcess, out exBitnessCheck))
+               {
+                   targetProcessBitness = Bitness.x64;
+               }
+               else
+               {
+                   targetProcessBitness = Bitness.x86;
+               }
+
+               if (exBitnessCheck == null && currentProcessBitness != targetProcessBitness)
+               {
+
+                   string errorMessage = string.Format("Process bitness mismatch!, Stacktracer.exe is of {0} and Target process {2} is of {1}. Please use {3} StackTracer.exe", currentProcessBitness == Bitness.x64 ? "64 bit" : "32 bit",
+                       targetProcessBitness == Bitness.x64 ? "64 bit" : "32 bit", targetProcess.ProcessName, currentProcessBitness == Bitness.x64 ? "32 bit" : "64 bit");
+                   Console.WriteLine(errorMessage);
+                   throw new Exception(errorMessage);
+               }
+               if (exBitnessCheck != null)
+               {
+                   StackTracerLogger.AppendLine("Bitness check for target process failed");
+                   StackTracerLogger.Append(exBitnessCheck.Message);
+               }
+               if (RunAsRemote)
+               {
+                   StackTracerLogger.AppendLine("Begining to inject remote thread");
+                   string appname = Assembly.GetExecutingAssembly().Location;
+                   StackTracerLogger.AppendFormat("target procid:{0}appname:{1}arguments{2}", targetProcess.Id, appname, arguments.Replace("/c", ""));
+
+                   Injector.InjectAndRun(targetProcess.Id, appname, arguments.Replace("/c", ""));
+
+               }
+               else
+               {
+                   //call the trace as 
+                   CaptureTrace(StackTracerLogger, targetProcessBitness, pid, delay, stackTraceCount, stacktraceLocation, pdelay);
+               }
+           }
+           else
+           {
+               //Console.WriteLine("There are multiple process instances with selected process name  :  {0}",processName);
+               //Console.WriteLine("Use process ID for {0} process to capture the stack trace ", processName);
+               Console.WriteLine("Example: StackTracer.exe PID /s 60 /i 500");
+               Console.WriteLine("StackTracer.exe w3wp /d 5 /s 60 /i 500");
+               Console.WriteLine("StackTracer.exe PID /d 5 /s 60 /i 500");
+
+
+           }
+       }
+
+       private static void CaptureTrace(StringBuilder StackTracerLogger, Bitness targetProcessBitness, int pid, int delay, int stackTraceCount, string stacktraceLocation, int pdelay)
+       {
+
+           if (pdelay > 0)
+           {
+               Console.WriteLine("Initiating the stacktrace capture after given delay of {0} seconds....", pdelay);
+           }
+
+
+           System.Threading.Thread.Sleep(pdelay * 1000);
+           if (HasCancelkeyPressed)
+           {
+               StackTracerLogger.AppendLine("Detected cancel key press,aborting trace capture");
+               Console.WriteLine("Detected cancel key press,aborting trace capture");
+           }
+           //StackTracerLogger.AppendLine("The selected pid for the process " + processName + " is " + pid);
+           StackTracer.Utils.StackTracer stackTracer = new StackTracer.Utils.StackTracer();
+           List<StackSample> stackSampleCollection = new List<StackSample>();
+           stackTracer.processName = Process.GetProcessById(pid).ProcessName;
+           stackTracer.processID = pid;
+
+           for (int i = 1; i <= stackTraceCount; i++)
+           {
+
+               // Instanting all the datastrcture to hold the 
+               //stactrace sample objects for each sample
+               StackSample stackTracerProcessobj = new StackSample();
+               stackTracerProcessobj.processThreadCollection = new List<Thread>();
+               stackTracerProcessobj.sampleCounter = i;
+               stackTracerProcessobj.samplingTime = DateTime.UtcNow;
+
+
+               // Trying to attach the debugger to the selected process
+               using (DataTarget dataTarget = DataTarget.AttachToProcess(pid, 5000, AttachFlag.Invasive))
+               {
+                   Console.WriteLine("Collecting sample # {0} ", i);
+                   StackTracerLogger.AppendLine("Collecting sample # " + i);
+
+                   string dacLocation = string.Empty;
+                   ClrRuntime runtime = null;
+                   try
+                   {
+
+                       dacLocation = dataTarget.ClrVersions[0].TryGetDacLocation();
+                       if (string.IsNullOrEmpty(dacLocation))
+                       {
+                           //to get this working in azure websites enviroment
+                           //try the path directly
+                           string mscordacwksFilename = dataTarget.ClrVersions[0].DacInfo.FileName;
+
+                           if (mscordacwksFilename.Contains("mscordacwks_x86_X86_4.0."))
+                           {
+                               if (targetProcessBitness == Bitness.x86)
+                               {
+                                   dacLocation = @"D:\Windows\Microsoft.NET\Framework\v4.0.30319\mscordacwks.dll";
+                               }
+                               else
+                                   dacLocation = @"D:\Windows\Microsoft.NET\Framework64\v4.0.30319\mscordacwks.dll";
+                           }
+                           else
+                           {
+                               if (targetProcessBitness == Bitness.x86)
+                               {
+                                   dacLocation = @"D:\Windows\Microsoft.NET\Framework\v2.0.50727\mscordacwks.dll";
+                               }
+                               else
+                                   dacLocation = @"D:\Windows\Microsoft.NET\Framework64\v2.0.50727\mscordacwks.dll";
+
+                           }
+
+                           StackTracerLogger.AppendLine("DacLocation: " + dacLocation);
+                       }
+
+                       StackTracerLogger.AppendLine("CLR Version: " + dataTarget.ClrVersions[0].DacInfo.FileName + dataTarget.ClrVersions[0].DacInfo.ImageBase);
+
+
+
+                       runtime = dataTarget.CreateRuntime(dacLocation);
+
+
+                   }
+                   catch (Exception ex)
+                   {
+
+                       Console.WriteLine("CLR Runtime could not be initialized or process does not have CLR loaded");
+                       Console.WriteLine(ex.Message);
+                       StackTracerLogger.AppendLine(ex.Message);
+                       throw ex;
+                   }
+                   stackTracerProcessobj.threadCount = runtime.Threads.Count;
+                   StackTracerLogger.AppendLine("=============================================================================================================");
+                   StackTracerLogger.AppendLine("There are" + runtime.Threads.Count + "threads in the" + Process.GetProcessById(pid).ProcessName + " process");
+                   StackTracerLogger.AppendLine("=============================================================================================================");
+                   StackTracerLogger.AppendLine();
+
+                   foreach (ClrThread crlThreadObj in runtime.Threads)
+                   {
+                       Thread stackTracerThreadObj = new Thread();
+                       List<StackTracer.Utils.StackFrame> tracerStackThread = new List<StackTracer.Utils.StackFrame>();
+                       IList<ClrStackFrame> Stackframe = crlThreadObj.StackTrace;
+                       stackTracerThreadObj.oSID = crlThreadObj.OSThreadId;
+                       stackTracerThreadObj.managedThreadId = crlThreadObj.ManagedThreadId;
+                       StackTracerLogger.AppendLine("There are " + crlThreadObj.StackTrace.Count + "  items in the stack for current thread ");
+                       foreach (ClrStackFrame stackFrame in Stackframe)
+                       {
+                           stackTracerThreadObj.sampleCaptureTime = DateTime.UtcNow;
+                           string tempClrMethod = "NULL";
+                           if (stackFrame.Method != null)
+                               tempClrMethod = stackFrame.Method.GetFullSignature(); // TO DO : We need to create a dicitonary.
+                           tracerStackThread.Add(new StackTracer.Utils.StackFrame(stackFrame.DisplayString, stackFrame.InstructionPointer, tempClrMethod, stackFrame.StackPointer));
+                       }
+                       stackTracerThreadObj.stackTrace = tracerStackThread;
+                       stackTracerProcessobj.processThreadCollection.Add(stackTracerThreadObj);
+                   }
+               }
+               //Adding the stacktrace sample to the stack trace sample collecction.
+               stackSampleCollection.Add(stackTracerProcessobj);
+               //Delaying the next stack trace sample by {delay} seconds.
+               System.Threading.Thread.Sleep(delay);
+               if (HasCancelkeyPressed)
+               {
+                   StackTracerLogger.AppendLine("Detected cancel key press,aborting trace capture");
+                   Console.WriteLine("Detected cancel key press,aborting trace capture");
+                   break;
+               }
+           }
+           //Pushing all the satckTrace samples in the global stacktracer object for serialization into xml
+           stackTracer.sampleCollection = stackSampleCollection;
+           Type testype = stackTracer.GetType();
+           //Calling function to serialize the stacktracer object.
+           ObjectSeralizer(stacktraceLocation, testype, stackTracer);
+           StackTracerLogger.AppendLine();
+       }
 
        static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
        {
