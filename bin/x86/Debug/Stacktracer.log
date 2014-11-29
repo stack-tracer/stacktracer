@@ -1,4 +1,4 @@
 Launching StackTracer.exe with params
-WindowsFormsApplication1 /c
+windowsformsapplication1 /c
 Begining to inject remote thread
-target procid:21924appname:D:\ST\stacktracer\bin\x86\Debug\StackTracer.exeargumentsWindowsFormsApplication1 
+target procid:17132appname:C:\stacktracer\stacktracer\bin\x86\Debug\StackTracer.exeargumentswindowsformsapplication1 
