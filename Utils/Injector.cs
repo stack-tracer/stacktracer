@@ -30,7 +30,7 @@ static extern IntPtr VirtualAllocEx(IntPtr hProcess, IntPtr lpAddress,uint dwSiz
     [DllImport("kernel32.dll", SetLastError = true)]
     static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, uint nSize, out UIntPtr lpNumberOfBytesWritten);
 
-    [DllImport("kernel32.dll", SetLastError = true)]
+    [DllImport("kernel32.dll",SetLastError = true)]
     static extern IntPtr CreateRemoteThread(IntPtr hProcess,
         IntPtr lpThreadAttributes, uint dwStackSize, IntPtr lpStartAddress, IntPtr lpParameter, uint dwCreationFlags, IntPtr lpThreadId);
 
@@ -45,9 +45,8 @@ static extern IntPtr VirtualAllocEx(IntPtr hProcess, IntPtr lpAddress,uint dwSiz
  [StructLayout(LayoutKind.Sequential,CharSet=CharSet.Unicode, Pack=1)]
 public struct RemoteThreadParams
 {
-     
+      //[MarshalAs(UnmanagedType.LPWStr)]
      public IntPtr lpApplicationName;
-
      
      public IntPtr lpCommandLine;
           
@@ -130,15 +129,14 @@ public struct RemoteThreadParams
         IntPtr procHandle = OpenProcess(PROCESS_CREATE_THREAD | PROCESS_QUERY_INFORMATION | PROCESS_VM_OPERATION | PROCESS_VM_WRITE | PROCESS_VM_READ, false, processid);
 
         // searching for the address of CreateProcessW and storing it in a pointer
-        IntPtr loadLibraryAddr = GetProcAddress(GetModuleHandle("kernel32.dll"), "CreateProcessW");
- 
-        // name of the dll we want to inject
-        //string dllName = "test.dll";
+        IntPtr CreateProcessWAddr = GetProcAddress(GetModuleHandle("kernel32.dll"), "LoadLibraryW");
 
+
+        //structure to pass multiple paramaters to CreateProcessW
         RemoteThreadParams myparams=new RemoteThreadParams();
 
-        STARTUPINFO si= new STARTUPINFO();
-        PROCESS_INFORMATION pi= new PROCESS_INFORMATION();
+       // STARTUPINFO si= new STARTUPINFO();
+        //PROCESS_INFORMATION pi= new PROCESS_INFORMATION();
 
         //myparams.lpApplicationName = applicationpath;
         //myparams.lpCommandLine = stacktracercmd;
@@ -152,34 +150,37 @@ public struct RemoteThreadParams
 
         // Allocate some native heap memory in your process big enough to store the
         // parameter data
-        IntPtr iptrtoparams = Marshal.AllocHGlobal(Marshal.SizeOf(myparams));
+       // IntPtr iptrtoparams = Marshal.AllocHGlobal(Marshal.SizeOf(myparams));
 
         // Use to alloc "committed" memory that is addressable by other process
         //IntPtr iptrremoteallocatedmemory =
-
-        IntPtr remoteallocMemAddress = VirtualAllocEx(procHandle, IntPtr.Zero, (uint)Marshal.SizeOf(myparams), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-        IntPtr remoteallocMemAddresssi = VirtualAllocEx(procHandle, IntPtr.Zero, (uint)Marshal.SizeOf(si), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-        IntPtr remoteallocMemAddresspi = VirtualAllocEx(procHandle, IntPtr.Zero, (uint)Marshal.SizeOf(pi), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+        //allocating memory in the remote process.
+        //IntPtr remoteallocMemAddress = VirtualAllocEx(procHandle, IntPtr.Zero, (uint)Marshal.SizeOf(myparams), MEM_COMMIT , PAGE_READWRITE);
+        //IntPtr remoteallocMemAddresssi = VirtualAllocEx(procHandle, IntPtr.Zero, (uint)Marshal.SizeOf(si), MEM_COMMIT , PAGE_READWRITE);
+        //IntPtr remoteallocMemAddresspi = VirtualAllocEx(procHandle, IntPtr.Zero, (uint)Marshal.SizeOf(pi), MEM_COMMIT , PAGE_READWRITE);
 
         IntPtr remoteAlloclpApplicationName = VirtualAllocEx(procHandle, IntPtr.Zero, (uint)((applicationpath.Length + 1) * Marshal.SizeOf(typeof(char))), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-        IntPtr remoteAlloclpCommandLine = VirtualAllocEx(procHandle, IntPtr.Zero, (uint)((stacktracercmd.Length + 1) * Marshal.SizeOf(typeof(char))), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+        //IntPtr remoteAlloclpCommandLine = VirtualAllocEx(procHandle, IntPtr.Zero, (uint)((stacktracercmd.Length + 1) * Marshal.SizeOf(typeof(char))), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 
         //Marshal.StructureToPtr(si, myparams.lpProcessInformation, false);
         //Marshal.StructureToPtr(pi, myparams.lpStartupInfo, false);
-        myparams.lpApplicationName = remoteAlloclpApplicationName;
-        myparams.lpCommandLine = remoteAlloclpCommandLine;
-        myparams.lpProcessInformation = remoteallocMemAddresspi;
-        myparams.lpStartupInfo = remoteallocMemAddresssi;
+       myparams.lpApplicationName = remoteAlloclpApplicationName;
+        //myparams.lpApplicationName = applicationpath;
+       // myparams.lpCommandLine = remoteAlloclpCommandLine;
+        
+        //myparams.lpProcessInformation = remoteallocMemAddresspi;
+        //myparams.lpStartupInfo = remoteallocMemAddresssi;
 
         // Copies the data in your structure into the native heap memory just allocated
-        Marshal.StructureToPtr(myparams, iptrtoparams, false);
+        //Marshal.StructureToPtr(myparams, iptrtoparams, false);
 
-        byte[] paramsbytes=new byte[Marshal.SizeOf(myparams)];
+        //byte[] paramsbytes = RawSerialize(myparams);
+            //=new byte[Marshal.SizeOf(myparams)];
         
-        for (int i = 0; i < paramsbytes.Length; i++)
-        {
-            paramsbytes[i] = Marshal.ReadByte(iptrtoparams, i);
-        }
+        //for (int i = 0; i < paramsbytes.Length; i++)
+        //{
+        //    paramsbytes[i] = Marshal.ReadByte(iptrtoparams, i);
+        //}
 
         // alocating some memory on the target process - enough to store the name of the dll
         // and storing its address in a pointer
@@ -190,19 +191,35 @@ public struct RemoteThreadParams
         // writing the name of the dll there
         UIntPtr bytesWritten;
 //        WriteProcessMemory(procHandle, allocMemAddress, Encoding.Default.GetBytes(dllName), (uint)((dllName.Length + 1) * Marshal.SizeOf(typeof(char))), out bytesWritten);
-
-        WriteProcessMemory(procHandle, remoteallocMemAddress,paramsbytes, (uint)Marshal.SizeOf(myparams), out bytesWritten);
-        WriteProcessMemory(procHandle, remoteAlloclpApplicationName, Encoding.Unicode.GetBytes(applicationpath), (uint)((applicationpath.Length + 1) * Marshal.SizeOf(typeof(char))), out bytesWritten);
-        WriteProcessMemory(procHandle, remoteAlloclpCommandLine, Encoding.Unicode.GetBytes(stacktracercmd), (uint)((stacktracercmd.Length + 1) * Marshal.SizeOf(typeof(char))), out bytesWritten);
-        // creating a thread that will call LoadLibraryA with allocMemAddress as argument
-        IntPtr threadHandle = CreateRemoteThread(procHandle, IntPtr.Zero, 0, loadLibraryAddr, remoteAlloclpApplicationName, 0, IntPtr.Zero);
+        //writing the structure to pass multiple params
+        //WriteProcessMemory(procHandle, remoteallocMemAddress,paramsbytes, (uint)Marshal.SizeOf(myparams), out bytesWritten);
+        WriteProcessMemory(procHandle, remoteAlloclpApplicationName, Encoding.Unicode.GetBytes(applicationpath.ToLower().Replace("stacktracer.exe","stinit.dll")), (uint)((applicationpath.Length + 1) * 2), out bytesWritten);
+        //WriteProcessMemory(procHandle, remoteAlloclpCommandLine, Encoding.Unicode.GetBytes(@"D:\ST\beta\stacktracer.exe w3wp"), (uint)((stacktracercmd.Length + 1) * 2), out bytesWritten);
+        // creating a thread that will call CreateProcessW with allocMemAddress as argument
+        IntPtr threadHandle = CreateRemoteThread(procHandle, IntPtr.Zero, 0, CreateProcessWAddr, remoteAlloclpApplicationName, 0, IntPtr.Zero);
 
         if (threadHandle== IntPtr.Zero)
         {
             int errorcode=Marshal.GetLastWin32Error();
             throw new Exception("Error:" + errorcode.ToString("X") + "CreateRemoteThread failed to run");
         }
+
+       
        return 0;
+    }
+    public static byte[]  RawSerialize(object anything)
+    {
+        int rawsize =
+            Marshal.SizeOf(anything);
+        byte[] rawdata = new byte[rawsize];
+        GCHandle handle =
+            GCHandle.Alloc(rawdata,
+            GCHandleType.Pinned);
+        Marshal.StructureToPtr(anything,
+            handle.AddrOfPinnedObject(),
+            false);
+        handle.Free();
+        return rawdata;
     }
 }
 

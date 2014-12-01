@@ -13,6 +13,7 @@ using System.Security.Cryptography;
 using System.Security;
 using System.Runtime.InteropServices;
 using StackTracer.Utils;
+using System.Security.Principal;
 
 namespace StackTracer
 { 
@@ -54,7 +55,21 @@ namespace StackTracer
                 string arguments=string.Empty;
                // Getting the parameters inatilized 
                 #region Region for setting the console parameters switches   
-                
+                StackTracerLogger.AppendLine("Initializing StackTracer.exe");
+                WindowsIdentity currentIdentity = WindowsIdentity.GetCurrent();
+                if (currentIdentity != null)
+                {
+                    StackTracerLogger.AppendLine("Current Identity is " + currentIdentity.Name);
+                    StackTracerLogger.AppendLine("User: " + currentIdentity.User.Value);
+                    StackTracerLogger.AppendLine("Owner: " + currentIdentity.Owner.Value);
+                    StackTracerLogger.AppendLine("Is System: " + currentIdentity.IsSystem.ToString());
+                    StackTracerLogger.AppendLine("Is Guest: " + currentIdentity.IsGuest.ToString());
+                    StackTracerLogger.AppendLine("Is Authenticated" + currentIdentity.IsAuthenticated.ToString());
+                    StackTracerLogger.AppendLine("Is Anonymous: " + currentIdentity.IsAnonymous.ToString());
+                    StackTracerLogger.AppendLine("ImpersonationLevel: " + currentIdentity.ImpersonationLevel.ToString());
+                    StackTracerLogger.AppendLine("Authentication Type: " + currentIdentity.AuthenticationType.ToString());
+                    StackTracerLogger.AppendLine("Apartment State: " + System.Threading.Thread.CurrentThread.GetApartmentState().ToString());
+                }
                //if no arguments are paased ,show help menu
                 if (args!=null && args.Length != 0)
                 {

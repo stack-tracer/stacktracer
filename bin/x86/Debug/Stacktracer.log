@@ -1,4 +1,83 @@
 Launching StackTracer.exe with params
-WindowsFormsApplication1 /c
-Begining to inject remote thread
-target procid:21924appname:D:\ST\stacktracer\bin\x86\Debug\StackTracer.exeargumentsWindowsFormsApplication1 
+30800
+Collecting sample # 1
+CLR Version: mscordacwks_x86_X86_4.0.30319.34209.dll0
+=============================================================================================================
+There are2threads in theWindowsFormsApplication1 process
+=============================================================================================================
+
+There are 7  items in the stack for current thread 
+There are 1  items in the stack for current thread 
+Collecting sample # 2
+CLR Version: mscordacwks_x86_X86_4.0.30319.34209.dll0
+=============================================================================================================
+There are2threads in theWindowsFormsApplication1 process
+=============================================================================================================
+
+There are 7  items in the stack for current thread 
+There are 1  items in the stack for current thread 
+Collecting sample # 3
+CLR Version: mscordacwks_x86_X86_4.0.30319.34209.dll0
+=============================================================================================================
+There are2threads in theWindowsFormsApplication1 process
+=============================================================================================================
+
+There are 7  items in the stack for current thread 
+There are 1  items in the stack for current thread 
+Collecting sample # 4
+CLR Version: mscordacwks_x86_X86_4.0.30319.34209.dll0
+=============================================================================================================
+There are2threads in theWindowsFormsApplication1 process
+=============================================================================================================
+
+There are 7  items in the stack for current thread 
+There are 1  items in the stack for current thread 
+Collecting sample # 5
+CLR Version: mscordacwks_x86_X86_4.0.30319.34209.dll0
+=============================================================================================================
+There are2threads in theWindowsFormsApplication1 process
+=============================================================================================================
+
+There are 7  items in the stack for current thread 
+There are 1  items in the stack for current thread 
+Collecting sample # 6
+CLR Version: mscordacwks_x86_X86_4.0.30319.34209.dll0
+=============================================================================================================
+There are2threads in theWindowsFormsApplication1 process
+=============================================================================================================
+
+There are 7  items in the stack for current thread 
+There are 1  items in the stack for current thread 
+Collecting sample # 7
+CLR Version: mscordacwks_x86_X86_4.0.30319.34209.dll0
+=============================================================================================================
+There are2threads in theWindowsFormsApplication1 process
+=============================================================================================================
+
+There are 7  items in the stack for current thread 
+There are 1  items in the stack for current thread 
+Collecting sample # 8
+CLR Version: mscordacwks_x86_X86_4.0.30319.34209.dll0
+=============================================================================================================
+There are2threads in theWindowsFormsApplication1 process
+=============================================================================================================
+
+There are 7  items in the stack for current thread 
+There are 1  items in the stack for current thread 
+Collecting sample # 9
+CLR Version: mscordacwks_x86_X86_4.0.30319.34209.dll0
+=============================================================================================================
+There are2threads in theWindowsFormsApplication1 process
+=============================================================================================================
+
+There are 7  items in the stack for current thread 
+There are 1  items in the stack for current thread 
+Collecting sample # 10
+CLR Version: mscordacwks_x86_X86_4.0.30319.34209.dll0
+=============================================================================================================
+There are2threads in theWindowsFormsApplication1 process
+=============================================================================================================
+
+There are 7  items in the stack for current thread 
+There are 1  items in the stack for current thread 
+
