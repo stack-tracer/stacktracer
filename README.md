@@ -3,7 +3,13 @@
 <img src="http://debugging.io/images/stack.ico"
  alt="stacktracer logo" title="stacktracer" align="right" />
 
-StackTracer is a command line tool that captures stack trace samples at fixed intervals from any .net CLR process.
+StackTracer is a very simple command line tool which can help you troubleshoot hang issues in any .net application .This tool captures stack trace samples at fixed intervals from any .net CLR process which can be easily analysed to find the root cause of your performance problem.
+
+###some simple use cases:
+
+* A request to your mvc application takes 5 seconds in production but not in your development enviroment   
+* An intermittent hang of a windows/WPF application    
+* Your asp.net website running in Microsoft Azure Websites performing slow   
 
 This is a console application attaches and works with any .net process; no access to application source code is necessary,
 no library modifications are needed, and there is no run-time instrumentation of CLR code. Configuration
