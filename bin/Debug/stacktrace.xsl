@@ -11,6 +11,8 @@
     <link href="https://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" media="all" rel="stylesheet"/>    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.1/modernizr.min.js"></script>
       <!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>-->
+         <link rel="stylesheet" 
+href="http://cdn.datatables.net/1.10.2/css/jquery.dataTables.min.css"/>
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
        
             <style type="text/css">            
@@ -667,20 +669,23 @@ font-size: 13px;
             </table>
             <br/>           
             <br/>
-            <table class="table table-striped">
-              <tr>
+            <table id="myTable" class="table table-striped tablesorter">
+             <thead>
+                <tr>
                 <td>Sample#</td>
                 <td>CLR Thread Num</td>
                 <td>OS Thread#</td>                
                 <td>TimeStamp</td>
                 <td>Current CLR Method</td>
                 <td>View thread stack from all samples</td>
-              </tr> 
-              <xsl:for-each select="./StackTracer/sampleCollection/StackSample">
-                
-                    <xsl:call-template name="SampleDetails"></xsl:call-template>
-                  
-              </xsl:for-each>             
+                  </tr>
+            </thead>
+              <tbody>
+              <xsl:for-each select="./StackTracer/sampleCollection/StackSample" >
+                <xsl:sort select="./processThreadCollection/Thread/managedThreadId" data-type="number" order="descending"/>
+                    <xsl:call-template name="SampleDetails"></xsl:call-template>                  
+              </xsl:for-each>  
+                </tbody>
             </table>          
           
           </div>
@@ -768,9 +773,12 @@ if("undefined"==typeof jQuery)throw new Error("Bootstrap's JavaScript requires j
 ]]>
             </xsl:text>          
           </script>
+            <script type="text/javascript" 
+src="http://cdn.datatables.net/1.10.2/js/jquery.dataTables.min.js"></script>
         <script type="text/javascript">
           <xsl:text disable-output-escaping="yes">
 <![CDATA[ $(document).ready(function (){
+$('#myTable').dataTable();
  $("div.timeline-icon").each(function(){$(this).attr("data-hidden","1")});
               $("div.timeline-icon").click(function()
               {
@@ -922,7 +930,33 @@ function nodeClick()
   </xsl:template>
   <xsl:template name="SampleDetails">
     <xsl:for-each select="./processThreadCollection/Thread">
-      <xsl:call-template name="ThreadStack"/>    
+      <!--<xsl:sort select="./oSID" data-type="number"/>-->
+      <xsl:if test="count(./stackTrace/StackFrame) &gt; 0">
+    
+    <tr>
+      <td><xsl:value-of select="../../sampleCounter"/></td>
+      <td><xsl:value-of select="./managedThreadId"/></td>
+      <td>
+        <xsl:value-of select="./oSID"/>
+      </td>      
+      <td><xsl:value-of select="substring(./sampleCaptureTime,12,12)"/></td>
+      <td>
+        <!--<xsl:value-of select="count(./stackTrace/StackFrame)"></xsl:value-of>-->
+        <a ><xsl:attribute name="href">#Stack<xsl:value-of select="../../sampleCounter"/><xsl:value-of select="./oSID"/></xsl:attribute>
+        <xsl:value-of select="./stackTrace/StackFrame[1]/clrMethodString"></xsl:value-of>
+        </a>        
+        <!--<ul>
+        <xsl:for-each select="./stackTrace/StackFrame">
+          <xsl:call-template name="StackFrame" ></xsl:call-template>        
+        </xsl:for-each> 
+          </ul>-->
+    </td>
+      <td><!-- Large modal -->
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bs-example-modal-lg">
+      <xsl:attribute name="data-osid"><xsl:value-of select="./oSID"/></xsl:attribute>
+    View Stacks</button></td>
+    </tr> 
+          </xsl:if>
     </xsl:for-each>    
   </xsl:template>
   <xsl:template name="SampleSummary">
