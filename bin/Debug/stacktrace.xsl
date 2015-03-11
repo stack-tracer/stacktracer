@@ -721,15 +721,18 @@ font-size: 13px;
       <xsl:call-template name="StackTraceDetailsAnim"/>
           </div>
         <!--<xsl:call-template name="StackSummary"/>-->
-           <div id="stacksfrmAllSamples"  class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+           <div id="stacksfrmAllSamples"  class="modal fade bs-example-modal-lg modal-scrollbar-measure" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg" >
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true"></span></button>
         <h4 class="modal-title" id="modalHeader">Stacks From All The Samples</h4>
+      <ul id="navtimeline" class="nav nav-pills">
+  <li><a href="#"></a></li>
+</ul>
       </div>
-      <div class="modal-body" style="overflow-y: scroll">
-        <p></p>
+      <div class="modal-body" style="height:70vh;overflow: scroll">
+        
        <table id="tblStacksFrmSamples" class="table">
          <tr></tr>
        
@@ -790,10 +793,20 @@ $('#stacksfrmAllSamples').on('show.bs.modal', function (event) {
   var modal = $(this);
 tbl=modal.find("#tblStacksFrmSamples tr");
 tbl.empty();
+var nav=modal.find("#navtimeline");
+nav.empty();
+var idSt;
   modal.find('.modal-title').text('Stacks from all samples with OS Thread ID ' + recipient);
 //modal.find('.modal-body').text(button.html());
 $("ul.stacktrace[data-osid='trace"+recipient+"']").each(function(index,element){
-tbl.append($("<td></td>").append(element));});
+idSt=index+"st"+recipient;
+var newElmt=$(element).clone();
+newElmt.attr("id",idSt);
+nav.append($("<li><a href='#"+idSt+"'>"+newElmt.data("timestamp")+"</a></li>"));
+tbl.append($("<td></td>").append(newElmt).prepend("<span class='badge'>"+newElmt.data("timestamp")+"</span>"));});
+//var timest=element.data("timeline");
+
+//nav.append($("<li></li>").append($("<a></a>").append($(element).data(""timeline))));
 })
           });
 function nodeClick()
@@ -849,11 +862,13 @@ function nodeClick()
             <span class="badge">
               <xsl:value-of select="../../sampleCounter"/>
             </span>
-          <!--Time Stamp: <span class="badge"><xsl:value-of select="substring(./sampleCaptureTime,12,12)"/></span>-->
+          <!--Time Stamp: <span class="badge"></span>-->
             </ol>
             <div class="well">
             <ul class="stacktrace">
               <xsl:attribute name="data-osid">trace<xsl:value-of select="./oSID"/></xsl:attribute>
+              <xsl:attribute name="data-timestamp"><xsl:value-of select="substring(./sampleCaptureTime,12,12)"/></xsl:attribute>
+              
             <xsl:for-each select="./stackTrace/StackFrame">
               <li>
             <xsl:call-template name="StackFrame"/>
