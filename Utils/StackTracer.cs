@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace StackTracer.Utils
 {
@@ -10,14 +11,24 @@ namespace StackTracer.Utils
     /// StackTracer class is used to contain the stacktracer object which 
     /// is seralized to xml object after collecting stack traces.
     /// </summary>
-    public class StackTracer
+    public class StackCaptures
     {
-        public StackTracer()
+        public StackCaptures(string processName,int processId)
         {
-
+            ProcessName = processName;
+            ProcessID = processId;
+            Samples = new List<StackSample>();
         }
-        public string processName { get; set; }
-        public int processID { get; set; }
-        public List<StackSample> sampleCollection { get; set; }
+        
+        [XmlElement(ElementName = "processName")]
+        public string ProcessName { get; set; }
+
+        [XmlElement(ElementName = "processID")]
+        public int ProcessID { get; set; }
+        public List<StackSample> Samples { get; set; }
+        public void AddSample(StackSample sample)
+        { 
+            Samples.Add(sample);
+        }
     }
 }

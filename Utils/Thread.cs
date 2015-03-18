@@ -24,5 +24,24 @@ namespace StackTracer.Utils
         public int managedThreadId { get; set; }
         public uint oSID { get; set; }
         public List<StackFrame> stackTrace { get; set; }
+        public DateTime? RequestTimeStamp { get; set; }
+        public bool HasHttpContext { get; set; }
+
+        public string RequestUrl { get; set; }
+
+        public ulong HttpContextAddress { get; set; }
+
+        public ulong WorkerRequestAddress { get; set; }
+
+        public ulong HttpRequestAddress { get; set; }
+
+        public ulong HttpResponseAddress { get; set; }
+        public bool IsRequestCompleted { get; set; }
+
+
+        public bool IsRequestEnded { get; set; }
+
+        public bool IsFlushing { get; set; }
+
     }
 }
