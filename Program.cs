@@ -102,7 +102,7 @@ namespace StackTracer
                            // Instanting all the datastrcture to hold the 
                            //stactrace sample objects for each sample
                            StackSample currentSample = new StackSample();
-                           currentSample.processThreadCollection = new List<Thread>();
+                           currentSample.processThreadCollection = new List<STThread>();
                            currentSample.sampleCounter = i;
                            currentSample.samplingTime = DateTime.UtcNow;
                            
@@ -144,21 +144,22 @@ namespace StackTracer
                                }
                                currentSample.threadCount = runtime.Threads.Count;
                                _logger.AppendLine("=============================================================================================================");
-                               _logger.AppendLine("There are" + runtime.Threads.Count + "threads in the" + Process.GetProcessById(_processId).ProcessName + " process");
+                               _logger.AppendLine("There are" + runtime.Threads.Count + "threads in the" + targetProcess.ProcessName + " process");
                                _logger.AppendLine("=============================================================================================================");
                                _logger.AppendLine();
 
                                foreach (ClrThread crlThreadObj in runtime.Threads)
                                {
-                                   Thread stackTracerThreadObj = new Thread();
+                                   STThread currentCLRThread = new STThread();
                                   
-                                   List<StackTracer.Utils.StackFrame> tracerStackThread = new List<StackTracer.Utils.StackFrame>();
+                                   List<StackTracer.Utils.StackFrame> stackFrames = new List<StackTracer.Utils.StackFrame>();
+
                                    //IList<ClrStackFrame> Stackframe = crlThreadObj.StackTrace;
-                                   stackTracerThreadObj.oSID = crlThreadObj.OSThreadId;
+                                   currentCLRThread.oSID = crlThreadObj.OSThreadId;
 
                                    if (!crlThreadObj.IsGC && !crlThreadObj.IsFinalizer && !crlThreadObj.IsSuspendingEE && !crlThreadObj.IsDebuggerHelper)
                                    {
-                                       stackTracerThreadObj.managedThreadId = crlThreadObj.ManagedThreadId;
+                                       currentCLRThread.managedThreadId = crlThreadObj.ManagedThreadId;
                                        _logger.AppendLine("There are " + crlThreadObj.StackTrace.Count + "  items in the stack for current thread ");
 
                                        var clrroots = crlThreadObj.EnumerateStackObjects();
@@ -168,23 +169,23 @@ namespace StackTracer
                                        {
                                            if (context.Type.Name == "System.Web.HttpContext")
                                            {
-                                               stackTracerThreadObj.HasHttpContext = true;
+                                               currentCLRThread.HasHttpContext = true;
                                                if (context.Type.HasSimpleValue)
                                                {
                                                    var timestamp = context.Type.GetFieldByName("_utcTimestamp");
                                                    var timestampAdd = timestamp.GetFieldAddress(context.Address);
                                                    var dateData = timestamp.Type.GetFieldByName("dateData");
                                                    var ticks = dateData.GetFieldValue(timestampAdd, true);
-                                                   stackTracerThreadObj.RequestTimeStamp = new DateTime((long)((ulong)ticks & 4611686018427387903uL));
+                                                   currentCLRThread.RequestTimeStamp = new DateTime((long)((ulong)ticks & 4611686018427387903uL));
                                                    var request = context.Type.GetFieldByName("_request");
                                                    ulong reqAddress = (ulong)request.GetFieldValue(context.Object);
                                                    var url = request.Type.GetFieldByName("_rawUrl");
-                                                   stackTracerThreadObj.RequestUrl = (string)url.GetFieldValue(reqAddress);
+                                                   currentCLRThread.RequestUrl = (string)url.GetFieldValue(reqAddress);
                                                }
                                            }
 
                                        }
-                                       stackTracerThreadObj.sampleCaptureTime = DateTime.UtcNow;
+                                       currentCLRThread.sampleCaptureTime = DateTime.UtcNow;
                                        foreach (ClrStackFrame stackFrame in crlThreadObj.StackTrace)
                                        {
 
@@ -201,13 +202,13 @@ namespace StackTracer
                                                    }
                                                    else
                                                        tempClrMethod = ipToMethodMap[stackFrame.InstructionPointer];
-                                                   tracerStackThread.Add(new StackTracer.Utils.StackFrame(stackFrame.DisplayString, stackFrame.InstructionPointer, tempClrMethod, stackFrame.StackPointer));
+                                                   stackFrames.Add(new StackTracer.Utils.StackFrame(stackFrame.DisplayString, stackFrame.InstructionPointer, tempClrMethod, stackFrame.StackPointer));
                                                }
                                            }
 
                                        }
-                                       stackTracerThreadObj.stackTrace = tracerStackThread;
-                                       currentSample.processThreadCollection.Add(stackTracerThreadObj); 
+                                       currentCLRThread.stackTrace = stackFrames;
+                                       currentSample.processThreadCollection.Add(currentCLRThread); 
                                    }
                                }
                            }

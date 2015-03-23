@@ -18,6 +18,6 @@ namespace StackTracer.Utils
         public int sampleCounter { get; set; }
         public DateTime samplingTime { get; set; }
         public int threadCount { get; set; }
-        public List<Thread> processThreadCollection { get; set; }
+        public List<STThread> processThreadCollection { get; set; }
     }
 }

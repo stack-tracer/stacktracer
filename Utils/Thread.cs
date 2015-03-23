@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace StackTracer.Utils
 {
@@ -10,12 +11,13 @@ namespace StackTracer.Utils
     /// Thread object contains the information related to the current thread for which stack
     /// trace is being generated
     /// </summary>
-    public class Thread
+    [XmlRoot(ElementName = "Thread")]
+    public class STThread
     {
-        public Thread()
+        public STThread()
         {
         }
-        public Thread(DateTime stackCaptureTime, List<StackFrame> stackTrace)
+        public STThread(DateTime stackCaptureTime, List<StackFrame> stackTrace)
         {
             this.sampleCaptureTime = stackCaptureTime;
             this.stackTrace = stackTrace;

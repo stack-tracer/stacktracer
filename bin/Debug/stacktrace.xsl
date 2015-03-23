@@ -12,7 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.1/modernizr.min.js"></script>
       <!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>-->
          <link rel="stylesheet" 
-href="http://cdn.datatables.net/1.10.2/css/jquery.dataTables.min.css"/>
+href="https://cdn.datatables.net/1.10.2/css/jquery.dataTables.min.css"/>
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
        
             <style type="text/css">            
@@ -774,12 +774,12 @@ if("undefined"==typeof jQuery)throw new Error("Bootstrap's JavaScript requires j
             </xsl:text>          
           </script>
             <script type="text/javascript" 
-src="http://cdn.datatables.net/1.10.2/js/jquery.dataTables.min.js"></script>
+src="https://cdn.datatables.net/1.10.2/js/jquery.dataTables.min.js"></script>
         <script type="text/javascript">
           <xsl:text disable-output-escaping="yes">
 <![CDATA[ $(document).ready(function (){
 $('#myTable').dataTable();
- $("div.timeline-icon").each(function(){$(this).attr("data-hidden","1")});
+ /*$("div.timeline-icon").each(function(){$(this).attr("data-hidden","1")});
               $("div.timeline-icon").click(function()
               {
                   if($(this).attr("data-hidden")=="1")
@@ -793,6 +793,7 @@ $('#myTable').dataTable();
                       $("div.timeline-row").show();
                   }
               });
+*/
 
 $('#stacksfrmAllSamples').on('show.bs.modal', function (event) {
   var button = $(event.relatedTarget); // Button that triggered the modal
@@ -848,7 +849,7 @@ function nodeClick()
         <div class="timeline-time">
           <small>OS Thread # <xsl:value-of select="./oSID"/>  </small><xsl:value-of select="substring(./sampleCaptureTime,12,12)"/>
         </div>
-        <div class="timeline-icon" data-hidden="0" title="click here to show only this thread from all the samples" >
+        <div class="timeline-icon" data-toggle="modal" data-target=".bs-example-modal-lg" data-hidden="0" title="click here to show only this thread from all the samples" >
           <xsl:attribute name="data-osid"><xsl:value-of select="./oSID"/></xsl:attribute>
           <div class="bg-primary">            
             <i class="fa fa-filter"></i>
@@ -943,7 +944,21 @@ function nodeClick()
       <td>
         <!--<xsl:value-of select="count(./stackTrace/StackFrame)"></xsl:value-of>-->
         <a ><xsl:attribute name="href">#Stack<xsl:value-of select="../../sampleCounter"/><xsl:value-of select="./oSID"/></xsl:attribute>
-        <xsl:value-of select="./stackTrace/StackFrame[1]/clrMethodString"></xsl:value-of>
+          <xsl:choose>
+          <xsl:when test="string(./stackTrace/StackFrame[1]/clrMethodString) != 'NULL'">
+              <xsl:value-of select="./stackTrace/StackFrame[1]/clrMethodString"></xsl:value-of>          
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:choose>
+          <xsl:when test="string(./stackTrace/StackFrame[2]/clrMethodString) != 'NULL'">
+              <xsl:value-of select="./stackTrace/StackFrame[2]/clrMethodString"></xsl:value-of>          
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:value-of select="./stackTrace/StackFrame[3]/clrMethodString"></xsl:value-of>            
+          </xsl:otherwise>
+        </xsl:choose>          
+          </xsl:otherwise>
+        </xsl:choose>
         </a>        
         <!--<ul>
         <xsl:for-each select="./stackTrace/StackFrame">

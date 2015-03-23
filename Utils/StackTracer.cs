@@ -30,5 +30,20 @@ namespace StackTracer.Utils
         { 
             Samples.Add(sample);
         }
+        public Summary Summary { get { return CalculateSummary(); } }
+
+        private Summary CalculateSummary()
+        {
+            throw new NotImplementedException();
+        }
+    }
+    public class Summary
+    {
+        public String RequestUrl { get; set; }
+        public DateTime StartTime { get; set; }
+        public Boolean IsFinished { get; set; }
+
+        public String CLRMethod { get; set; }
+
     }
 }
