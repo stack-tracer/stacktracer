@@ -122,6 +122,8 @@
     </Compile>
     <Compile Include="Utils\Algorithms.cs" />
     <Compile Include="Utils\Injector.cs" />
+    <Compile Include="Utils\ParseState.cs" />
+    <Compile Include="Utils\RunOptions.cs" />
     <Compile Include="Utils\StackTracer.cs" />
     <Compile Include="Utils\StackSample.cs" />
     <Compile Include="Utils\NativeMetods.cs" />
